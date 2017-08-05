@@ -10,7 +10,7 @@
 
 ## 使用方法
 
-打开 xuetangx.py 修改其中的邮箱
+打开 `xuetangx.py` 修改其中的邮箱
 
 CMD 输入：<kbd>python xuetangx.py</kdb>
 
