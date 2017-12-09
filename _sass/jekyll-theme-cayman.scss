@@ -1,4 +1,4 @@
-@charset "UTF-8";
+@charset "utf-8";
 @import "normalize";
 @import "rouge-github";
 @import "variables";
@@ -109,7 +109,7 @@ a {
 .project-name {
   margin-top: 0;
   margin-bottom: 0.1rem;
-  font-family: 华文宋体, "Times New Roman", 宋体;
+  font-family: 华文宋体;
 
   @include large {
     font-size: 3.25rem;
