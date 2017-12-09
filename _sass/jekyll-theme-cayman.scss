@@ -109,7 +109,7 @@ a {
 .project-name {
   margin-top: 0;
   margin-bottom: 0.1rem;
-  font-family: 华文宋体;
+  font-family: 华文宋体, sans-serif;
 
   @include large {
     font-size: 3.25rem;
