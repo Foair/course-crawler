@@ -1,167 +1,198 @@
-# Foair
-# 2017年5月15日
+#!/usr/bin/python
+# -*- coding: utf-8 -*-
+
+""" 学堂在线课程下载 """
 
 import re
 import os
 import sys
 import json
-import getpass
 import requests
 from bs4 import BeautifulSoup
 
-# 用户名或邮箱
-ACCOUNT = '873669965@qq.com'
-# 可以设置密码，没有密码在登录时需要输入密码
-PASSWORD = None
+# 基本 URL
+BASE_URL = 'http://www.xuetangx.com'
 
-BASEURL = 'http://www.xuetangx.com'
-CONNECT = requests.Session()
-CONNECT.headers.update({'User-Agent': 'Mozilla/5.0'})
-# 匹配课程编号的正则表达式
-NAME = re.compile(r'^[第一二三四五六七八九十\d]+[\s\d\._章课节讲]*[\.\s、]\s*\d*')
+# 定义一个全局的会话
+CONNECTION = requests.Session()
+CONNECTION.headers.update({'User-Agent': 'Mozilla/5.0'})
+
 # 连续两个以上的空白字符正则表达式
-RMSPACE = re.compile(r'\s+')
+REG_SPACES = re.compile(r'\s+')
 # Windows 文件名非法字符的正则表达式
-FILENAME = re.compile(r'[\\/:\*\?"<>\|]')
+REG_FILE = re.compile(r'[\\/:\*\?"<>\|]')
 
 
-def login(account, pwd):
-    '进行用户认证'
-    if not pwd:
-        pwd = getpass.getpass('输入密码：')
-    loginaddr = 'http://www.xuetangx.com/v2/login_ajax'
-    data = {'username': account, 'password': pwd, 'remember': 'true'}
-    back = CONNECT.post(loginaddr, data=data)
-    if back.json()['success']:
-        print('验证成功！')
-    else:
-        print('登录信息不正确！')
-        sys.exit(1)
-    with open('cookies.json', 'w') as cookiefile:
-        json.dump(CONNECT.cookies.get_dict(), cookiefile)
+def get_book(url):
+    """ 获得所有的 PDF 电子书 """
+    # 含有导航条的页面
+    print('正在获取电子书……')
+    nav_page = CONNECTION.get(url).text
+    shelves = set(re.findall(r'/courses/.+/pdfbook/\d/', nav_page))
+    for shelf_count, shelf in enumerate(shelves, 1):
+        res = CONNECTION.get(BASE_URL + shelf).text
+        soup = BeautifulSoup(res, 'lxml')
+        save_dir = os.path.join(BASE_DIR, 'Books', str(shelf_count))
+        if not os.path.exists(save_dir):
+            os.makedirs(save_dir)
+        for book_count, book in enumerate(soup.select('#booknav a'), 1):
+            print('------>', book.string)
+            file_name = REG_FILE.sub(' ', book.string) + '.pdf'
+            pdf = CONNECTION.get(BASE_URL + book['rel'][0]).content
+            with open(os.path.join(save_dir, file_name), 'wb') as pdf_file:
+                pdf_file.write(pdf)
 
 
-def main():
-    '准备工作开始'
-    if os.path.exists('cookies.json'):
-        print('本地存在 cookies 文件……')
-        with open('cookies.json') as cookiefile:
-            cookies = json.load(cookiefile)
-        requests.utils.add_dict_to_cookiejar(CONNECT.cookies, cookies)
-        status = CONNECT.get('http://www.xuetangx.com/header_ajax')
-        if status.json()['login']:
-            print('验证成功！')
-        else:
-            print('本地 cookies 文件失效，获取新的 cookies……')
-            login(ACCOUNT, PASSWORD)
-    else:
-        login(ACCOUNT, PASSWORD)
-    addr = input('输入课程的地址：')
-    # 获取课程的标题
-    about_page = CONNECT.get(addr).text
-    title = BeautifulSoup(about_page, 'lxml').find(id='title1').string
-    print(title)
-    title = FILENAME.sub('', title)
-    # 创建文件夹
-    try:
-        os.mkdir(title)
-    except FileExistsError:
-        print('课程已经存在，采用分析模式……')
-    # 进入课件页面
-    addr = addr.rstrip('about') + 'courseware'
-    return addr
+def get_handout(url):
+    """ 从课程信息页面获得课程讲义的 HTML 文件 """
+    res = CONNECTION.get(url).text
+    soup = BeautifulSoup(res, 'lxml')
+    handouts = soup.find(class_='handouts')
+    for link in handouts.select('a[href^="/"]'):
+        link['href'] = BASE_URL + link['href']
+
+    with open(os.path.join(BASE_DIR, 'Handouts.html'), 'w', encoding='utf-8') as handouts_html:
+        handouts_html.write('<!DOCTYPE html>\n<html>\n<head>\n<title>讲义</title>\n<meta charset="utf-8">\n</head>\n<body>\n%s</body>\n</html>\n' % handouts.prettify())
 
 
-def download(link, name):
-    '根据文档相对地址来下载文件，并命名'
-    res = CONNECT.get(BASEURL + link)
-    with open(name, 'wb') as resfile:
-        resfile.write(res.content)
-
-
-def getcontent(url):
-    flag1 = 0
-    flag2 = 0
-    flag3 = 0
-    courseware = CONNECT.get(url).text
-    soup = BeautifulSoup(courseware, 'lxml')
-    chapters = soup.find(id='accordion').find_all(class_='chapter')
-    cnt1 = 1
-    for chapcnt, chapter in enumerate(chapters, 1):
-        chapname = chapter.h3.a.get_text(strip=True)
-        secs = chapter.select('ul a')
-        print('%s' % chapname)
-        cnt2 = 1
-        for seccnt, sec in enumerate(secs, 1):
-            sec_url = BASEURL + sec['href']
-            sec_title = sec.p.string.strip()
-            print('  %s' % sec_title)
-            # 每个具体的页面
-            detail = CONNECT.get(sec_url).text
-            soup = BeautifulSoup(detail, 'lxml')
-            reses = soup.find(id='sequence-list').find_all('li')
-            COURSE_REGX = re.compile('data-ccsource=.(\w+).')
-            tabcnt = 0
-            cnt3 = 0
-            for res in reses:
-                # print(res.a.get('data-page-title'))
-                # if i == 0: # 每一个标签页
-                seq = res.a.get('aria-controls')
-                contents = soup.find(id=seq)
-                tab = BeautifulSoup(contents.string, 'lxml').div.div
-                # with open('tab.html', 'w', encoding='utf-8') as f:
-                #     f.write(tab.prettify())
-                for tab in tab.find_all('div', class_='xblock'):
-                    video_per_tab = 0
-                    # 标签页的每一个区块
-                    types = tab['data-type']
-                    if types == 'Problem' or types == 'InlineDiscussion' or types == 'HTMLModule':
-                        continue
-                    # print(tab)
-                    name = tab.h2.string.strip()
-                    if name == 'Video':
-                        tabcnt += 1
-                        if tabcnt == 1:
-                            name = NAME.sub('', sec_title)
-                        else:
-                            name = '%s（%d）' % (NAME.sub('', sec_title), tabcnt)
-                    if types == 'Video':
-                        cnt3 += 1
-                        flag2 = 1
-                        flag3 = 1
-                        video_per_tab += 1
-                        if video_per_tab != 1:
-                            name = '%s-%d' % (name, video_per_tab)
-                        video_id = tab.div['data-ccsource']
-                        print('------->', name)
-                        getvideo(video_id, '%d.%d.%d %s' % (cnt1, cnt2, cnt3,
-                                                            name))
-
-            if flag2 == 1:
-                cnt2 += 1
-                flag2 = 0
-
-        if flag3 == 1:
-            cnt1 += 1
-            flag3 = 0
-
-
-def getvideo(video_id, name):
-    name = FILENAME.sub('', name)
-    name = RMSPACE.sub(' ', name)
-    res = CONNECT.get('https://xuetangx.com/videoid2source/' + video_id).text
+def get_video(video_id, file_name):
+    """ 根据视频 ID 和文件名字获取视频信息 """
+    res = CONNECTION.get('https://xuetangx.com/videoid2source/' + video_id).text
     video_url = json.loads(res)['sources']['quality20'][0]
-    Links.write(re.search(r'(.+-20.mp4)', video_url).group(1) + '\n')
-    Renamer.write('rename "' + re.search(r'(\w+-20.mp4)', video_url).group(1) +
-                  '" "%s.mp4"\n' % name)
+    VIDEOS.write(video_url + '\n')
+    RENAMER.write('REN "' + re.search(r'(\w+-20.mp4)', video_url).group(1) + '" "%s.mp4"\n' % file_name)
+
+
+def get_content(url):
+    """ 获取网页详细内容 """
+    # 获取课件页面（点击进入学习后的页面）
+    courseware = CONNECTION.get(url).text
+    soup = BeautifulSoup(courseware, 'lxml')
+    # 获取所有章的 DOM 节点
+    chapters = soup.find(id='accordion').find_all(class_='chapter')
+
+    for chapter_count, chapter in enumerate(chapters, 1):
+        # 章的标题
+        chapter_title = chapter.h3.a.get_text(strip=True)
+
+        print('%s' % chapter_title)
+        OUTLINE.write('%s {%d}\n' % (chapter_title, chapter_count))
+
+        # 获取节的信息，包括 URL 等
+        sections = chapter.select('ul a')
+        for section_count, section_info in enumerate(sections, 1):
+            # 节的地址
+            section_url = BASE_URL + section_info['href']
+            # 节的标题
+            section_title = section_info.p.string.strip()
+
+            print('  %s' % section_title)
+            OUTLINE.write('  %s {%d.%d}\n' % (section_title, chapter_count, section_count))
+
+            # 每个节的页面
+            section_page = CONNECTION.get(section_url).text
+            soup = BeautifulSoup(section_page, 'lxml')
+            tabs = soup.find(id='sequence-list').find_all('li')
+
+            # 视频的编号每一节从 0 开始
+            video_sec_count = 0
+
+            for tab_count, tab_info in enumerate(tabs, 1):
+                # 每一个 tab（标签）的标题
+                # title 可能出现换行符和重复，所以用 data-page-title
+                tab_title = tab_info.a.get('data-page-title')
+
+                print('    %s' % tab_title)
+                OUTLINE.write('    %s {%d.%d.%d}\n' % (tab_title, chapter_count, section_count, tab_count))
+
+                # 获取 tab 的序列号
+                tab_sequence = tab_info.a.get('aria-controls')
+
+                # 获取经过编码后的 tab 内容
+                tab_escape = soup.find(id=tab_sequence).string
+
+                tab = BeautifulSoup(tab_escape, 'lxml').div.div
+
+                # tab 中的块
+                blocks = tab.find_all('div', class_='xblock')
+                for block in blocks:
+                    try:
+                        # 极少数没有 data-type 属性
+                        block_type = block['data-type']
+                    except:
+                        continue
+                    if block_type == 'Problem' or block_type == 'InlineDiscussion' or block_type == 'HTMLModule':
+                        continue
+                    if block_type == 'Video':
+                        video_sec_count += 1
+                        # 替换连续空格或制表符为单个空格
+                        video_name = REG_SPACES.sub(' ', block.h2.string.strip())
+                        OUTLINE.write('      %s {%d.%d.%d}*\n' % (video_name, chapter_count, section_count, video_sec_count))
+                        video_id = block.div['data-ccsource']
+
+                        # 文件名
+                        file_name = REG_FILE.sub(' ', video_name)
+                        file_name = '%d.%d.%d %s' % (chapter_count, section_count, video_sec_count, file_name)
+
+                        print('------>', file_name)
+                        get_video(video_id, file_name)
+
+
+def start(url, path='', book=True, cookies={}):
+    """ 流程控制 """
+
+    global BASE_DIR, VIDEOS, RENAMER, OUTLINE
+    requests.utils.add_dict_to_cookiejar(CONNECTION.cookies, cookies)
+    status = CONNECTION.get('http://www.xuetangx.com/header_ajax')
+    if status.json()['login']:
+        print('验证成功！\n')
+    else:
+        print('Cookies 失效，请获取新的 cookies！')
+        sys.exit(1)
+
+    # 课程信息页面
+    about_page = CONNECTION.get(url).text
+    soup = BeautifulSoup(about_page, 'lxml')
+
+    # 获取课程的标题
+    course_name = soup.find(id='title1').string
+    # 获取课程的发布者（一般是大学）
+    institution = soup.find(class_='courseabout_text').a.string
+
+    # 可以用于文件夹名字的标题
+    dir_name = REG_FILE.sub('', course_name + ' - ' + institution)
+    print(dir_name)
+
+    BASE_DIR = os.path.join(path, dir_name)
+
+    # 尝试创建文件夹
+    try:
+        os.makedirs(BASE_DIR)
+    except FileExistsError:
+        pass
+
+    # 课件页面地址
+    courseware = url.rstrip('about') + 'courseware'
+    # 课程讲义地址
+    handout = url.rstrip('about') + 'info'
+
+    OUTLINE = open(os.path.join(BASE_DIR, 'Outline.txt'), 'w', encoding='utf-8')
+    VIDEOS = open(os.path.join(BASE_DIR, 'Videos.txt'), 'w', encoding='utf-8')
+    RENAMER = open(os.path.join(BASE_DIR, 'Rename.bat'), 'w', encoding='utf-8')
+    RENAMER.write('CHCP 65001\n\n')
+
+    if book:
+        # 使用 handout 作为入口更快
+        get_book(handout)
+
+    get_handout(handout)
+    get_content(courseware)
+
+    VIDEOS.close()
+    RENAMER.close()
+    OUTLINE.close()
 
 
 if __name__ == '__main__':
-    Links = open('Links.txt', 'w', encoding='utf-8')
-    Renamer = open('Rename.bat', 'w', encoding='utf-8')
-    Renamer.write('chcp 65001\n')
-    Toc = open('ToC.txt', 'w', encoding='utf-8')
-    getcontent(main())
-    Links.close()
-    Renamer.close()
-    Toc.close()
+    # start('http://www.xuetangx.com/courses/course-v1:TsinghuaX+00740043X_2015_T2+sp/about', r'F:\MOOCs', True)
+    pass
