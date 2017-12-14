@@ -25,7 +25,7 @@ def cookie_to_json():
 def main():
     parser = argparse.ArgumentParser(description='下载 MOOC 课程。')
     parser.add_argument('url', help='课程地址')
-    parser.add_argument('-d', default=r'F:\MOOCs', help='下载目录')
+    parser.add_argument('-d', default=r'', help='下载目录')
     parser.add_argument('--no-pdf', action='store_true', help='不下载 PDF 文档')
 
     args = parser.parse_args()
