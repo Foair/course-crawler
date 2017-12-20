@@ -18,10 +18,10 @@ layout: default
 
 ## 准备
 
-请安装最新的 Python 3，并且使用 `pip` 安装两个库：`requests`，`BeautifulSoup4`。
+请安装最新的 Python 3，并且使用 `pip` 安装 3 个库：`requests`，`BeautifulSoup4`，`lxml`：
 
 ```bash
-pip isntall requests BeautifulSoup4
+pip isntall requests BeautifulSoup4 lxml
 ```
 
 然后下载 ZIP 压缩文件（使用 Git 也是可以的），参照下面的各个文件的说明修改参数和保存路径。
