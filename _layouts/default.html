@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="{{ site.lang | default: "cmn-Hans" }}">
+  <head>
+    <meta charset="utf-8">
+    <title>{{ site.title }} | {{ site.description }}</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#b6d9c5">
+    <link rel="stylesheet" href="{{ '/assets/css/style.css?v=' | append: site.github.build_revision | relative_url }}">
+  </head>
+  <body>
+    <section class="page-header">
+      <h1 class="project-name">{{ site.title | default: site.github.repository_name }}</h1>
+      <h2 class="project-tagline">{{ site.description | default: site.github.project_tagline }}</h2>
+      {% if site.github.is_project_page %}<a href="{{ site.github.repository_url }}" class="btn">前往 GitHub</a>{% endif %}
+      <a href="https://github.com/Foair/course-crawler/archive/master.zip" class="btn">下载最新</a>
+    </section>
+    <section class="main-content">
+      {{ content }}
+      <footer class="site-footer">
+        {% if site.github.is_project_page %}<span class="site-footer-owner"><a href="{{ site.github.repository_url }}">{{ site.github.repository_name }}</a> 由 <a href="{{ site.github.owner_url }}">{{ site.github.owner_name }}</a> 维护</span>{% endif %}
+        <span class="site-footer-credits">此页面由 <a href="https://pages.github.com/">GitHub Pages</a> 生成</span>
+      </footer>
+    </section>
+  </body>
+</html>
