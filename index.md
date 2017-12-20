@@ -35,7 +35,6 @@ pip install requests BeautifulSoup4 lxml
 下面是各个 MOOC 平台的说明，找到自己需要的看即可。
 
 - [中国大学MOOC](#中国大学mooc)
-
 - [学堂在线](#学堂在线)
 - [网易云课堂 MOOC](#网易云课堂-mooc)
 
