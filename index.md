@@ -26,16 +26,20 @@ pip isntall requests BeautifulSoup4
 
 然后下载 ZIP 压缩文件（使用 Git 也是可以的），参照下面的各个文件的说明修改参数和保存路径。
 
-`mooc.py`：主程序
-`icourse.py`：中国大学MOOC模块
-`study.py`：网易云课堂 MOOC 模块
-`xuetangx.py`：学堂在线模块
+- `mooc.py`：主程序
+
+- `icourse.py`：中国大学MOOC模块
+- `study.py`：网易云课堂 MOOC 模块
+- `xuetangx.py`：学堂在线模块
 
 下面是各个 MOOC 平台的说明，找到自己需要的看即可。
 
-[中国大学MOOC](#中国大学mooc)
-[学堂在线](#学堂在线)
-[网易云课堂 MOOC](#网易云课堂-mooc)
+- [中国大学MOOC](#中国大学mooc)
+
+- [学堂在线](#学堂在线)
+- [网易云课堂 MOOC](#网易云课堂-mooc)
+
+其他常见问题参见 [FAQ](#faq)
 
 ## 中国大学MOOC
 
@@ -81,7 +85,7 @@ console.log(document.cookie);
 
 无法适用于网易云课堂的普通课程，只适用于 `mooc.study.163.com` 域下的课程，只能使用 cookie 登录。不像中国大学MOOC那样，网易云课堂 MOOC 必须要登录才有权限查看和下载课程，所以登录的 cookies 务必设置。
 
-第一个参数是像这样的地址：
+课程地址是这样的地址：
 
 `http://mooc.study.163.com/course/2001281002#/info`
 
@@ -107,7 +111,7 @@ console.log(document.cookie);
 python mooc.py http://www.icourse163.org/course/BIT-1001870001 -d "F:\Courses"
 ```
 
-值得注意的是，`"F:\Courses"` 最后不能有 `\`。当这个目录名存在空格的时候，需要使用 `""`。
+值得注意的是，`"F:\Courses"` 最后不能有 `\`。当这个目录名存在空格的时候，必须使用 `""`。
 
 还有一个可选参数是 `--no-pdf`，当指定了这个参数之后，网易的网站不下载课件，学堂在线的网站不下载电子书。比如：
 
@@ -188,10 +192,16 @@ REN "1005899086_7780acc4ac074ed89b6301e41349a2c1_shd.mp4" "3.1.1 平面方程（
 
 ### 几个文件夹
 
-☸ 中国大学MOOC和网易云课堂 MOOC 课程
+对于中国大学MOOC和网易云课堂 MOOC 课程
 
 `Files` 是课程的附件；`PDFs` 是课程的课件；`Texts` 是课程的富文本。
 
-☸ 学堂在线
+学堂在线
 
 `Books` 是课程提供的电子书。
+
+## FAQ
+
+☸ 我的 cookies 输错了（失效了），怎么重新填写 cookies？
+
+> Cookies 是保存在文件里的，对于学堂在线是 `cookies_xuetangx.json`，网易云课堂是 `cookies_mooc_study.json`，只要删除对应的文件就会要求重新输入 cookies 了。
