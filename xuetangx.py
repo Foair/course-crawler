@@ -1,6 +1,5 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
-
 """ 学堂在线课程下载 """
 
 import re
@@ -58,9 +57,12 @@ def get_handout(url):
 def get_video(video_id, file_name):
     """ 根据视频 ID 和文件名字获取视频信息 """
     res = CONNECTION.get('https://xuetangx.com/videoid2source/' + video_id).text
-    video_url = json.loads(res)['sources']['quality20'][0]
+    try:
+        video_url = json.loads(res)['sources']['quality20'][0]
+    except:
+        video_url = json.loads(res)['sources']['quality10'][0]
     VIDEOS.write(video_url + '\n')
-    RENAMER.write('REN "' + re.search(r'(\w+-20.mp4)', video_url).group(1) + '" "%s.mp4"\n' % file_name)
+    RENAMER.write('REN "' + re.search(r'(\w+-[12]0.mp4)', video_url).group(1) + '" "%s.mp4"\n' % file_name)
 
 
 def get_content(url):
@@ -136,6 +138,26 @@ def get_content(url):
 
                         print('------>', file_name)
                         get_video(video_id, file_name)
+
+                        # 可用的字幕
+                        subtitle_available_url = BASE_URL + block.div['data-transcript-available-translations-url']
+                        subtitle_available = CONNECTION.get(subtitle_available_url).json()
+                        base_subtitle_url = BASE_URL + block.div['data-transcript-translation-url'] + '/'
+                        print('$$$', subtitle_available)
+                        if len(subtitle_available) == 1:
+                            multi_subtitle = False
+                        else:
+                            multi_subtitle = True
+                        for subtitle_url in subtitle_available:
+                            if multi_subtitle:
+                                sub_file_name = file_name + '_' + subtitle_url + '.str'
+                            subtitle_url = base_subtitle_url + subtitle_url
+                            print('$$$', subtitle_url)
+                            print('$$$', sub_file_name)
+                            CONNECTION.get(subtitle_url)
+                            subtitle = CONNECTION.get(subtitle_available_url.rstrip('available_translations') + 'download').content
+                            with open(os.path.join(BASE_DIR, sub_file_name), 'wb') as subtitle_file:
+                                subtitle_file.write(subtitle)
 
 
 def start(url, path='', book=True, cookies={}):
