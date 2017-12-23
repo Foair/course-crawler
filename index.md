@@ -2,7 +2,7 @@
 layout: default
 ---
 
-一个基于 Python 3 的 MOOC 课程爬虫，可以获取 [中国大学MOOC](http://www.icourse163.org/)、[学堂在线](http://www.xuetangx.com/)、[网易云课堂 MOOC](http://mooc.study.163.com/) 的免费课程，方便离线观看。中国大学MOOC和网易云课堂 MOOC 目前可以获取到的资源有视频、富文本、附件和字幕；学堂在线可以获取到视频和电子书。
+一个基于 Python 3 的 MOOC 课程爬虫，可以获取 [中国大学MOOC](http://www.icourse163.org/)、[学堂在线](http://www.xuetangx.com/)、[网易云课堂 MOOC](http://mooc.study.163.com/) 的免费课程，方便离线观看。中国大学MOOC和网易云课堂 MOOC 目前可以获取到的资源有视频、富文本、附件和字幕；学堂在线可以获取到视频、电子书和字幕。
 
 虽然程序写的不怎么样，但是结构齐全、命名规范，可以很方便定位和查找。
 
@@ -24,10 +24,9 @@ layout: default
 pip install requests BeautifulSoup4 lxml
 ```
 
-然后下载 ZIP 压缩文件（使用 Git 也是可以的），参照下面的各个文件的说明修改参数和保存路径。
+然后下载 ZIP 压缩文件（使用 Git 也是可以的），下面是各个文件的简单说明：
 
 - `mooc.py`：主程序
-
 - `icourse.py`：中国大学MOOC模块
 - `study.py`：网易云课堂 MOOC 模块
 - `xuetangx.py`：学堂在线模块
@@ -38,7 +37,7 @@ pip install requests BeautifulSoup4 lxml
 - [学堂在线](#学堂在线)
 - [网易云课堂 MOOC](#网易云课堂-mooc)
 
-其他常见问题参见 [FAQ](#faq)
+其他常见问题参见 [FAQ](#faq)。
 
 ## 中国大学MOOC
 
