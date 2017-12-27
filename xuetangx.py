@@ -143,7 +143,6 @@ def get_content(url):
                         subtitle_available_url = BASE_URL + block.div['data-transcript-available-translations-url']
                         subtitle_available = CONNECTION.get(subtitle_available_url).json()
                         base_subtitle_url = BASE_URL + block.div['data-transcript-translation-url'] + '/'
-                        print('$$$', subtitle_available)
                         if len(subtitle_available) == 1:
                             multi_subtitle = False
                         else:
@@ -151,9 +150,9 @@ def get_content(url):
                         for subtitle_url in subtitle_available:
                             if multi_subtitle:
                                 sub_file_name = file_name + '_' + subtitle_url + '.str'
+                            else:
+                                sub_file_name = file_name + '.str'
                             subtitle_url = base_subtitle_url + subtitle_url
-                            print('$$$', subtitle_url)
-                            print('$$$', sub_file_name)
                             CONNECTION.get(subtitle_url)
                             subtitle = CONNECTION.get(subtitle_available_url.rstrip('available_translations') + 'download').content
                             with open(os.path.join(BASE_DIR, sub_file_name), 'wb') as subtitle_file:
