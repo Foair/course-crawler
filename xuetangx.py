@@ -141,7 +141,10 @@ def get_content(url):
 
                         # 可用的字幕
                         subtitle_available_url = BASE_URL + block.div['data-transcript-available-translations-url']
-                        subtitle_available = CONNECTION.get(subtitle_available_url).json()
+                        try:
+                            subtitle_available = CONNECTION.get(subtitle_available_url).json()
+                        except:
+                            continue
                         base_subtitle_url = BASE_URL + block.div['data-transcript-translation-url'] + '/'
                         if len(subtitle_available) == 1:
                             multi_subtitle = False
