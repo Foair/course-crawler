@@ -141,22 +141,27 @@ def get_content(url):
 
                         # 可用的字幕
                         subtitle_available_url = BASE_URL + block.div['data-transcript-available-translations-url']
-                        subtitle_available = CONNECTION.get(subtitle_available_url).json()
-                        base_subtitle_url = BASE_URL + block.div['data-transcript-translation-url'] + '/'
-                        if len(subtitle_available) == 1:
-                            multi_subtitle = False
-                        else:
-                            multi_subtitle = True
-                        for subtitle_url in subtitle_available:
-                            if multi_subtitle:
-                                sub_file_name = file_name + '_' + subtitle_url + '.str'
+                        subtitle_connection = CONNECTION.get(subtitle_available_url)
+                        # 为了防止有些课程的章节不提供字幕下载
+                        if subtitle_connection.status_code == 200:
+                            subtitle_available = subtitle_connection.json()
+                            base_subtitle_url = BASE_URL + block.div['data-transcript-translation-url'] + '/'
+                            if len(subtitle_available) == 1:
+                                multi_subtitle = False
                             else:
-                                sub_file_name = file_name + '.str'
-                            subtitle_url = base_subtitle_url + subtitle_url
-                            CONNECTION.get(subtitle_url)
-                            subtitle = CONNECTION.get(subtitle_available_url.rstrip('available_translations') + 'download').content
-                            with open(os.path.join(BASE_DIR, sub_file_name), 'wb') as subtitle_file:
-                                subtitle_file.write(subtitle)
+                                multi_subtitle = True
+                            for subtitle_url in subtitle_available:
+                                if multi_subtitle:
+                                    sub_file_name = file_name + '_' + subtitle_url + '.str'
+                                else:
+                                    sub_file_name = file_name + '.str'
+                                subtitle_url = base_subtitle_url + subtitle_url
+                                CONNECTION.get(subtitle_url)
+                                subtitle = CONNECTION.get(subtitle_available_url.rstrip('available_translations') + 'download').content
+                                with open(os.path.join(BASE_DIR, sub_file_name), 'wb') as subtitle_file:
+                                    subtitle_file.write(subtitle)
+                        else:
+                            print(file_name+"下载失败")
 
 
 def start(url, path='', book=True, cookies={}):
