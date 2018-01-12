@@ -20,7 +20,8 @@ CONNECTION.headers.update({'User-Agent': 'Mozilla/5.0'})
 REG_SPACES = re.compile(r'\s+')
 # Windows 文件名非法字符的正则表达式
 REG_FILE = re.compile(r'[\\/:\*\?"<>\|]')
-
+# 排除默认序号
+REG_SORT = re.compile(r'^[第一二三四五六七八九十\d]+[\s\d\._\-章课节讲]*[\.\s、\-]\s*\d*')
 
 def get_book(url):
     """ 获得所有的 PDF 电子书 """
@@ -134,6 +135,7 @@ def get_content(url):
 
                         # 文件名
                         file_name = REG_FILE.sub(' ', video_name)
+                        file_name = REG_SORT.sub('', file_name)
                         file_name = '%d.%d.%d %s' % (chapter_count, section_count, video_sec_count, file_name)
 
                         print('------>', file_name)
