@@ -152,9 +152,9 @@ def get_content(url):
                             multi_subtitle = True
                         for subtitle_url in subtitle_available:
                             if multi_subtitle:
-                                sub_file_name = file_name + '_' + subtitle_url + '.str'
+                                sub_file_name = file_name + '_' + subtitle_url + '.srt'
                             else:
-                                sub_file_name = file_name + '.str'
+                                sub_file_name = file_name + '.srt'
                             subtitle_url = base_subtitle_url + subtitle_url
                             CONNECTION.get(subtitle_url)
                             subtitle = CONNECTION.get(subtitle_available_url.rstrip('available_translations') + 'download').content
