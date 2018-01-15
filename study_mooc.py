@@ -109,7 +109,7 @@ def get_resource(term_id):
 
                 if text[3] != 'null':
                     print('    【附件】' + text[4])
-                    params = {'nosKey': re.search('nosKey":"(.+?)"', text[3]).group(1), 'fileName': re.search('"fileName":"(.*)', text[3]).group(1)}
+                    params = {'nosKey': re.search('nosKey":"(.+?)"', text[3]).group(1), 'fileName': re.search('"fileName":"(.*?)"', text[3]).group(1)}
                     file_name = REG_FILE.sub(' ', rplsort.sub('', params['fileName']))
                     OUTLINE.write('    %s %s {%d.%d.%d}!\n' % (text[4], file_name, chapter_count, lesson_count, text_count))
 
