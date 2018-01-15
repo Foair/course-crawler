@@ -56,7 +56,6 @@ pip install requests BeautifulSoup4 lxml
 视频演示
 
 - YouTube：[https://youtu.be/3P76c_3cwjQ](https://youtu.be/3P76c_3cwjQ)
-
 - bilibili：[https://www.bilibili.com/video/av18343041/](https://www.bilibili.com/video/av18343041/)
 - 蓝奏云：[https://pan.lanzou.com/i0di3ba](https://pan.lanzou.com/i0di3ba)
 
