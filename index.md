@@ -53,6 +53,12 @@ pip install requests BeautifulSoup4 lxml
 
 ![中国大学MOOC 1](icourse_1.png)
 
+视频演示
+
+YouTube：https://youtu.be/3P76c_3cwjQ
+bilibili：https://www.bilibili.com/video/av18343041/
+蓝奏云：https://pan.lanzou.com/i0di3ba
+
 ## 学堂在线
 
 课程的地址必须是这个样子的：
