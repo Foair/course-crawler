@@ -41,13 +41,7 @@ pip install requests BeautifulSoup4 lxml
 
 ## 中国大学MOOC
 
-课程的地址必须是这个样子：
-
-`http://www.icourse163.org/course/TONGJI-1001569002`
-
-或者这个样子：
-
-`http://www.icourse163.org/course/TONGJI-1001569002?tid=1001640020`
+课程的地址必须 `http://www.icourse163.org/course/TONGJI-1001569002` 或`http://www.icourse163.org/course/TONGJI-1001569002?tid=1001640020` 这两种格式。
 
 这两个的区别就是开课的次数不同。第一个是第 2 次开课，第二个是第 1 次开课。
 
@@ -103,6 +97,8 @@ console.log(document.cookie);
 
 学堂在线和网易云课堂需要经过认证，如果没有看过前面的内容的话，可能要回到前面看看。
 
+# 其他选项
+
 `mooc.py` 可以有可选参数，`-h` 或 `--help` 显示帮助信息，`-d` 指定下载目录，比如：
 
 ```
@@ -127,7 +123,7 @@ python mooc.py http://www.icourse163.org/course/BIT-1001870001 --no-pdf
 
 ## 运行成功后
 
-课程的目录可能有如下文件（夹）：
+课程的目录可能有如下文件或目录：
 
 ```
 Files\
@@ -140,7 +136,7 @@ Videos.txt
 
 ### 课程的目录、视频和视频重命名
 
-☸ `Outline.txt` 是课程的目录，它可能长成这个样子：
+☸ `Outline.txt` 是课程的目录，它可能是这个样子：
 
 ```
 6.1 空间直角坐标系及向量 {1}
@@ -160,7 +156,7 @@ Videos.txt
 `{1.1.1}+`：富文本，一般是 HTML 文件，位于 `Texts` 目录下
 `{1.1.1}!`：附件，位于 `Files` 目录下
 
-☸ `Videos.txt` 是视频的链接，它可能长成这个样子：
+☸ `Videos.txt` 是视频的链接，它可能是这个样子：
 
 ```
 http://v.stu.126.net/mooc-video/nos/mp4/2017/02/21/1005820377_aa6e1b0d92314cdfaf6dcad3351b3533_shd.mp4?ak=99ed7479ee303d1b1361b0ee5a4abcee11069a7277fd2bfbd983de77f6586b3ab4d3781458cdbd61bf0041fae59dee85cb91769ba5850a28845217d0bc9bfb580015e48ffc49c659b128bfe612dda086d65894b8ef217f1626539e3c9eb40879c29b730d22bdcadb1b4f67996129275fa4c38c6336120510aea1ae1790819de86e0fa3e09eeabea1b068b3d9b9b6597acf0c219eb000a69c12ce9d568813365b3e099fcdb77c69ca7cd6141d92c122af
@@ -170,7 +166,7 @@ http://v.stu.126.net/mooc-video/nos/mp4/2017/02/21/1005822368_a91783c5f05a49e299
 
 可以把视频的链接用各种下载工具下载，比如 [aria2](https://github.com/aria2/aria2/releases)、[迅雷](http://dl.xunlei.com/) 等，也可以直接在浏览器中打开。
 
-☸ `Rename.bat` 可以把视频重命名，它可能长成这个样子：
+☸ `Rename.bat` 用于将视频重命名，它可能是这样的：
 
 ```
 CHCP 65001
@@ -190,11 +186,11 @@ REN "1005899086_7780acc4ac074ed89b6301e41349a2c1_shd.mp4" "3.1.1 平面方程（
 
 ### 几个文件夹
 
-对于中国大学MOOC和网易云课堂 MOOC 课程
+☸ 中国大学MOOC和网易云课堂 MOOC 课程
 
 `Files` 是课程的附件；`PDFs` 是课程的课件；`Texts` 是课程的富文本。
 
-学堂在线
+☸ 学堂在线
 
 `Books` 是课程提供的电子书。
 
@@ -203,3 +199,13 @@ REN "1005899086_7780acc4ac074ed89b6301e41349a2c1_shd.mp4" "3.1.1 平面方程（
 ☸ 我的 cookies 输错了（失效了），怎么重新填写 cookies？
 
 > Cookies 是保存在文件里的，对于学堂在线是 `cookies_xuetangx.json`，网易云课堂是 `cookies_mooc_study.json`，只要删除对应的文件就会要求重新输入 cookies 了。
+
+## 已知问题
+
+☸ 可能会出现被远程主机强制关闭一个连接。
+
+> 解决方法：等待一段时间然后重新尝试。
+
+☸ 网易云课堂的 cookies 很容易失效
+
+> 解决方法：更加频繁地修改 cookies。
