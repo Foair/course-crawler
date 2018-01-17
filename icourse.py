@@ -49,7 +49,7 @@ def get_resource(term_id):
 
     post_data = {'callCount': '1', 'scriptSessionId': '${scriptSessionId}190', 'c0-scriptName': 'CourseBean', 'c0-methodName': 'getMocTermDto', 'c0-id': '0', 'c0-param0': 'number:' + term_id, 'c0-param1': 'number:1', 'c0-param2': 'boolean:true', 'batchId': str(int(time.time() * 1000))}
 
-    res = CONNECTION.post('http://www.icourse163.org/dwr/call/plaincall/CourseBean.getMocTermDto.dwr', data=post_data).text.encode('utf-8').decode('unicode_escape')
+    res = CONNECTION.post('https://www.icourse163.org/dwr/call/plaincall/CourseBean.getMocTermDto.dwr', data=post_data).text.encode('utf-8').decode('unicode_escape')
 
     # 查找第 N 周的开课信息（正则匹配到 [id, name]）
     chapters = re.findall(r'homeworks=\w+;.+id=(\d+).+name="(.+)";', res)
@@ -100,7 +100,7 @@ def get_resource(term_id):
                     if not os.path.isdir(os.path.join(BASE_DIR, 'Files')):
                         os.mkdir(os.path.join(BASE_DIR, 'Files'))
                     print('------>', params['fileName'])
-                    attach = CONNECTION.get('http://www.icourse163.org/course/attachment.htm', params=params)
+                    attach = CONNECTION.get('https://www.icourse163.org/course/attachment.htm', params=params)
                     file_name = '%d.%d.%d %s' % (chapter_count, lesson_count, text_count, file_name)
                     with open(os.path.join(BASE_DIR, 'Files', file_name), 'wb') as file:
                         file.write(attach.content)
@@ -116,7 +116,7 @@ def parse_resource(res_info, name):
     file_name = REG_FILE.sub(' ', name)
 
     post_data = {'callCount': '1', 'scriptSessionId': '${scriptSessionId}190', 'httpSessionId': '5531d06316b34b9486a6891710115ebc', 'c0-scriptName': 'CourseBean', 'c0-methodName': 'getLessonUnitLearnVo', 'c0-id': '0', 'c0-param0': 'number:' + res_info[0], 'c0-param1': 'number:' + res_info[1], 'c0-param2': 'number:0', 'c0-param3': 'number:' + res_info[2], 'batchId': str(int(time.time() * 1000))}
-    res = CONNECTION.post('http://www.icourse163.org/dwr/call/plaincall/CourseBean.getLessonUnitLearnVo.dwr', data=post_data).text
+    res = CONNECTION.post('https://www.icourse163.org/dwr/call/plaincall/CourseBean.getLessonUnitLearnVo.dwr', data=post_data).text
 
     # 视频资源
     if res_info[1] == '1':
@@ -200,5 +200,5 @@ def start(url, path='', pdf=True):
 
 
 if __name__ == '__main__':
-    # start('http://www.icourse163.org/course/NEU-1001956020', r'F:\MOOCs', True)
+    # start('https://www.icourse163.org/course/NEU-1001956020', r'F:\MOOCs', True)
     pass

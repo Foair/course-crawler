@@ -29,7 +29,7 @@ def main():
     parser.add_argument('--no-pdf', action='store_true', help='不下载 PDF 文档')
 
     args = parser.parse_args()
-    if re.match(r'http://www.icourse163.org/course/.+?', args.url):
+    if re.match(r'https://www.icourse163.org/course/.+?', args.url):
         # 中国大学MOOC
         import icourse
         icourse.start(args.url, args.d, not args.no_pdf)
