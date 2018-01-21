@@ -127,10 +127,11 @@ def parse_resource(res_info, name):
         for subtitle in subtitles:
             # 如果只有一种语言的字幕
             if len(subtitles) == 1:
-                sub_name = file_name + '.txt'
+                sub_name = file_name + '.srt'
             else:
-                # <字幕名称>_<语言>.txt
-                sub_name = file_name + '_' + subtitle[0] + '.txt'
+                # <字幕名称>_<语言>.srt
+                subtitle_lang = subtitle[0].encode('utf-8').decode('unicode_escape')
+                sub_name = file_name + '_' + subtitle_lang + '.srt'
             print('------>', sub_name)
             res = CONNECTION.get(subtitle[1])
             with open(os.path.join(BASE_DIR, sub_name), 'wb') as file:
