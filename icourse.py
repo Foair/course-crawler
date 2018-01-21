@@ -90,7 +90,7 @@ def get_resource(term_id):
                 name = rplsort.sub('', text[4])
                 parse_resource(rich_text[text_count - 1], '%d.%d.%d %s' % (chapter_count, lesson_count, text_count, name))
 
-                if text[3] != 'null':
+                if text[3] != '""' and text[3] != 'null':
                     print('    【附件】' + text[4])
                     params = {'nosKey': re.search('nosKey":"(.+?)"', text[3]).group(1), 'fileName': re.search('"fileName":"(.+?)"', text[3]).group(1)}
                     file_name = REG_FILE.sub(' ', rplsort.sub('', params['fileName']))
