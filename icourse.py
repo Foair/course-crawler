@@ -90,10 +90,10 @@ def get_resource(term_id):
                 name = rplsort.sub('', text[4])
                 parse_resource(rich_text[text_count - 1], '%d.%d.%d %s' % (chapter_count, lesson_count, text_count, name))
 
-                if text[3] != '""' and text[3] != 'null':
+                if text[3] != 'null' and text[3] != '""':
                     print('    【附件】' + text[4])
                     params = {'nosKey': re.search('nosKey":"(.+?)"', text[3]).group(1), 'fileName': re.search('"fileName":"(.+?)"', text[3]).group(1)}
-                    file_name = REG_FILE.sub(' ', rplsort.sub('', params['fileName']))
+                    file_name = REG_FILE.sub('', rplsort.sub('', params['fileName']))
                     OUTLINE.write('    %s %s {%d.%d.%d}!\n' % (text[4], file_name, chapter_count, lesson_count, text_count))
 
                     # 直接下载附件
@@ -113,7 +113,7 @@ def parse_resource(res_info, name):
     # 第 1 个用来判断资源类型，因为不同的资源有不同的正则匹配方法
 
     # 替换名字中的非法字符用作文件名
-    file_name = REG_FILE.sub(' ', name)
+    file_name = REG_FILE.sub('', name)
 
     post_data = {'callCount': '1', 'scriptSessionId': '${scriptSessionId}190', 'httpSessionId': '5531d06316b34b9486a6891710115ebc', 'c0-scriptName': 'CourseBean', 'c0-methodName': 'getLessonUnitLearnVo', 'c0-id': '0', 'c0-param0': 'number:' + res_info[0], 'c0-param1': 'number:' + res_info[1], 'c0-param2': 'number:0', 'c0-param3': 'number:' + res_info[2], 'batchId': str(int(time.time() * 1000))}
     res = CONNECTION.post('https://www.icourse163.org/dwr/call/plaincall/CourseBean.getLessonUnitLearnVo.dwr', data=post_data).text

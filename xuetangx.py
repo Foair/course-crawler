@@ -37,7 +37,7 @@ def get_book(url):
             os.makedirs(save_dir)
         for book_count, book in enumerate(soup.select('#booknav a'), 1):
             print('------>', book.string)
-            file_name = REG_FILE.sub(' ', book.string) + '.pdf'
+            file_name = REG_FILE.sub('', book.string) + '.pdf'
             pdf = CONNECTION.get(BASE_URL + book['rel'][0]).content
             with open(os.path.join(save_dir, file_name), 'wb') as pdf_file:
                 pdf_file.write(pdf)
@@ -134,7 +134,7 @@ def get_content(url):
                         video_id = block.div['data-ccsource']
 
                         # 文件名
-                        file_name = REG_FILE.sub(' ', video_name)
+                        file_name = REG_FILE.sub('', video_name)
                         file_name = REG_SORT.sub('', file_name)
                         file_name = '%d.%d.%d %s' % (chapter_count, section_count, video_sec_count, file_name)
 
