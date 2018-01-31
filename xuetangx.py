@@ -63,7 +63,7 @@ def get_video(video_id, file_name):
     except:
         video_url = json.loads(res)['sources']['quality10'][0]
     VIDEOS.write(video_url + '\n')
-    RENAMER.write('REN "' + re.search(r'(\w+-[12]0.mp4)', video_url).group(1) + '" "%s.mp4"\n' % file_name)
+    RENAMER.write('REN "' + re.search(r'(\w+-[12]0.mp4)', video_url).group(1) + '" "%s"\n' % file_name)
 
 
 def get_content(url):
@@ -73,6 +73,8 @@ def get_content(url):
     soup = BeautifulSoup(courseware, 'lxml')
     # 获取所有章的 DOM 节点
     chapters = soup.find(id='accordion').find_all(class_='chapter')
+    # 视频总数
+    video_sum = 0
 
     for chapter_count, chapter in enumerate(chapters, 1):
         # 章的标题
@@ -108,6 +110,10 @@ def get_content(url):
                 print('    %s' % tab_title)
                 OUTLINE.write('    %s {%d.%d.%d}\n' % (tab_title, chapter_count, section_count, tab_count))
 
+                # 判断是否是 Video 这个名字，如果是话就替换为节标题
+                if tab_title == 'Video' or tab_title == '视频' or tab_title == '':
+                    tab_title = section_title
+
                 # 获取 tab 的序列号
                 tab_sequence = tab_info.a.get('aria-controls')
 
@@ -130,16 +136,27 @@ def get_content(url):
                         video_sec_count += 1
                         # 替换连续空格或制表符为单个空格
                         video_name = REG_SPACES.sub(' ', block.h2.string.strip())
+
                         OUTLINE.write('      %s {%d.%d.%d}*\n' % (video_name, chapter_count, section_count, video_sec_count))
+
+                        if video_name == 'Video' or video_name == '视频' or video_name == '':
+                            video_name = tab_title
+
                         video_id = block.div['data-ccsource']
 
                         # 文件名
+                        video_name = REG_SORT.sub('', video_name)
                         file_name = REG_FILE.sub('', video_name)
-                        file_name = REG_SORT.sub('', file_name)
                         file_name = '%d.%d.%d %s' % (chapter_count, section_count, video_sec_count, file_name)
+                        file_name_ext = file_name + '.mp4'
 
-                        print('------>', file_name)
-                        get_video(video_id, file_name)
+                        video_sum += 1
+
+                        print('------>', file_name_ext)
+                        get_video(video_id, file_name_ext)
+
+                        PLAYLIST.write('%d*file*%s\n' % (video_sum, file_name_ext))
+                        PLAYLIST.write('%d*title*%s\n\n' % (video_sum, '%d.%d %s' % (chapter_count, section_count, video_name)))
 
                         # 可用的字幕
                         subtitle_available_url = BASE_URL + block.div['data-transcript-available-translations-url']
@@ -167,7 +184,7 @@ def get_content(url):
 def start(url, path='', book=True, cookies={}):
     """ 流程控制 """
 
-    global BASE_DIR, VIDEOS, RENAMER, OUTLINE
+    global BASE_DIR, VIDEOS, RENAMER, OUTLINE, PLAYLIST
     requests.utils.add_dict_to_cookiejar(CONNECTION.cookies, cookies)
     status = CONNECTION.get('http://www.xuetangx.com/header_ajax')
     if status.json()['login']:
@@ -205,7 +222,9 @@ def start(url, path='', book=True, cookies={}):
     OUTLINE = open(os.path.join(BASE_DIR, 'Outline.txt'), 'w', encoding='utf-8')
     VIDEOS = open(os.path.join(BASE_DIR, 'Videos.txt'), 'w', encoding='utf-8')
     RENAMER = open(os.path.join(BASE_DIR, 'Rename.bat'), 'w', encoding='utf-8')
+    PLAYLIST = open(os.path.join(BASE_DIR, '_Playlist.dpl'), 'w', encoding='utf-8')
     RENAMER.write('CHCP 65001\n\n')
+    PLAYLIST.write('DAUMPLAYLIST\n\n')
 
     if book:
         # 使用 handout 作为入口更快
@@ -217,6 +236,7 @@ def start(url, path='', book=True, cookies={}):
     VIDEOS.close()
     RENAMER.close()
     OUTLINE.close()
+    PLAYLIST.close()
 
 
 if __name__ == '__main__':
