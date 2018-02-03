@@ -124,6 +124,8 @@ def parse_resource(res_info, file_name):
     # 3 个参数都会传给服务器
     # 第 1 个用来判断资源类型，因为不同的资源有不同的正则匹配方法
 
+    file_name = REG_FILE.sub('', file_name)
+
     post_data = {'callCount': '1', 'scriptSessionId': '${scriptSessionId}190', 'httpSessionId': '5531d06316b34b9486a6891710115ebc', 'c0-scriptName': 'CourseBean', 'c0-methodName': 'getLessonUnitLearnVo', 'c0-id': '0', 'c0-param0': 'number:' + res_info[0], 'c0-param1': 'number:' + res_info[1], 'c0-param2': 'number:0', 'c0-param3': 'number:' + res_info[2], 'batchId': str(int(time.time() * 1000))}
     res = CONNECTION.post('https://www.icourse163.org/dwr/call/plaincall/CourseBean.getLessonUnitLearnVo.dwr', data=post_data).text
 
