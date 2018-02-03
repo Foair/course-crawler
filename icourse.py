@@ -51,6 +51,9 @@ def get_resource(term_id):
 
     res = CONNECTION.post('https://www.icourse163.org/dwr/call/plaincall/CourseBean.getMocTermDto.dwr', data=post_data).text.encode('utf-8').decode('unicode_escape')
 
+    # 记录视频总数
+    video_sum = 0
+
     # 查找第 N 周的开课信息（正则匹配到 [id, name]）
     chapters = re.findall(r'homeworks=\w+;.+id=(\d+).+name="(.+)";', res)
     for chapter_count, chapter in enumerate(chapters, start=1):
@@ -70,7 +73,15 @@ def get_resource(term_id):
                 OUTLINE.write('    %s {%d.%d.%d}\n' % (video[3], chapter_count, lesson_count, video_count))
 
                 name = rplsort.sub('', video[3])
-                parse_resource(videos[video_count - 1], '%d.%d.%d %s' % (chapter_count, lesson_count, video_count, name))
+
+                # 替换名字中的非法字符用作文件名
+                file_name = REG_FILE.sub('', '%d.%d.%d %s' % (chapter_count, lesson_count, video_count, name))
+
+                video_sum += 1
+                PLAYLIST.write('%d*file*Videos\%s\n' % (video_sum, file_name + '.mp4'))
+                PLAYLIST.write('%d*title*%s\n\n' % (video_sum, '%d.%d %s' % (chapter_count, lesson_count, name)))
+
+                parse_resource(videos[video_count - 1], file_name)
 
             # 课件（正则匹配到 [contentId, contentType, id, name]）
             pdfs = re.findall(r'contentId=(\d+).+contentType=(3).+id=(\d+).+lessonId=' + lessons[lesson_count - 1][0] + r'.+name="(.+)"', res)
@@ -78,8 +89,9 @@ def get_resource(term_id):
                 print('    【课件】' + pdf[3])
                 OUTLINE.write('    %s {%d.%d.%d}*\n' % (pdf[3], chapter_count, lesson_count, pdf_count))
 
-                name = rplsort.sub('', pdf[3])
-                parse_resource(pdfs[pdf_count - 1], '%d.%d.%d %s' % (chapter_count, lesson_count, pdf_count, name))
+                if WANT_PDF:
+                    name = rplsort.sub('', pdf[3])
+                    parse_resource(pdfs[pdf_count - 1], '%d.%d.%d %s' % (chapter_count, lesson_count, pdf_count, name))
 
             # 富文本（正则匹配到 [contentId, contentType, id, jsonContent, name]）
             rich_text = re.findall(r'contentId=(\d+).+contentType=(4).+id=(\d+).+jsonContent=(.+);.+lessonId=' + lessons[lesson_count - 1][0] + r'.+name="(.+)"', res)
@@ -106,21 +118,17 @@ def get_resource(term_id):
                         file.write(attach.content)
 
 
-def parse_resource(res_info, name):
+def parse_resource(res_info, file_name):
     """ 解析资源地址和下载资源 """
     # 传入的 res_info 只会用到前 3 个参数（contentId、contentType 和 id）
     # 3 个参数都会传给服务器
     # 第 1 个用来判断资源类型，因为不同的资源有不同的正则匹配方法
-
-    # 替换名字中的非法字符用作文件名
-    file_name = REG_FILE.sub('', name)
 
     post_data = {'callCount': '1', 'scriptSessionId': '${scriptSessionId}190', 'httpSessionId': '5531d06316b34b9486a6891710115ebc', 'c0-scriptName': 'CourseBean', 'c0-methodName': 'getLessonUnitLearnVo', 'c0-id': '0', 'c0-param0': 'number:' + res_info[0], 'c0-param1': 'number:' + res_info[1], 'c0-param2': 'number:0', 'c0-param3': 'number:' + res_info[2], 'batchId': str(int(time.time() * 1000))}
     res = CONNECTION.post('https://www.icourse163.org/dwr/call/plaincall/CourseBean.getLessonUnitLearnVo.dwr', data=post_data).text
 
     # 视频资源
     if res_info[1] == '1':
-        # 将 ) 移到 mp4 的后面可以获得没有参数的视频地址
         mp4url = (re.search(r'mp4ShdUrl="(.*?\.mp4.*?)"', res) or re.search(r'mp4HdUrl="(.*?\.mp4.*?)"', res) or re.search(r'mp4SdUrl="(.*?\.mp4.*?)"', res)).group(1)
         # 查找字幕
         subtitles = re.findall(r'name="(.+)";.*url="(.*?)"', res)
@@ -134,9 +142,9 @@ def parse_resource(res_info, name):
                 sub_name = file_name + '_' + subtitle_lang + '.srt'
             print('------>', sub_name)
             res = CONNECTION.get(subtitle[1])
-            with open(os.path.join(BASE_DIR, sub_name), 'wb') as file:
+            with open(os.path.join(BASE_DIR, 'Videos', sub_name), 'wb') as file:
                 file.write(res.content)
-        print('------>', name + '.mp4')
+        print('------>', file_name + '.mp4')
         RENAMER.write('REN "' + re.search(r'(\w+\.mp4)', mp4url).group(1) + '" "' + file_name + '.mp4"' + '\n')
         VIDEOS.write(mp4url + '\n')
 
@@ -146,13 +154,12 @@ def parse_resource(res_info, name):
             print("------> 文件已经存在！")
             return
         pdf_url = re.search(r'textOrigUrl:"(.*?)"', res).group(1)
-        print('------>', name + '.pdf')
-        if WANT_PDF:
-            pdf = CONNECTION.get(pdf_url)
-            if not os.path.isdir(os.path.join(BASE_DIR, 'PDFs')):
-                os.mkdir(os.path.join(BASE_DIR, 'PDFs'))
-            with open(os.path.join(BASE_DIR, 'PDFs', file_name + '.pdf'), 'wb') as file:
-                file.write(pdf.content)
+        print('------>', file_name + '.pdf')
+        pdf = CONNECTION.get(pdf_url)
+        if not os.path.isdir(os.path.join(BASE_DIR, 'PDFs')):
+            os.mkdir(os.path.join(BASE_DIR, 'PDFs'))
+        with open(os.path.join(BASE_DIR, 'PDFs', file_name + '.pdf'), 'wb') as file:
+            file.write(pdf.content)
 
     # 获取富文本
     elif res_info[1] == '4':
@@ -160,7 +167,7 @@ def parse_resource(res_info, name):
             print("------> 文件已经存在！")
             return
         text = re.search(r'htmlContent:"(.*)",id', res.encode('utf-8').decode('unicode_escape'), re.S).group(1)
-        print('------>', name + '.html')
+        print('------>', file_name + '.html')
         if not os.path.isdir(os.path.join(BASE_DIR, 'Texts')):
             os.mkdir(os.path.join(BASE_DIR, 'Texts'))
         with open(os.path.join(BASE_DIR, 'Texts', file_name + '.html'), 'w', encoding='utf-8') as file:
@@ -170,7 +177,7 @@ def parse_resource(res_info, name):
 def start(url, path='', pdf=True):
     """ 流程控制 """
 
-    global BASE_DIR, RENAMER, VIDEOS, OUTLINE, WANT_PDF
+    global BASE_DIR, RENAMER, VIDEOS, OUTLINE, WANT_PDF, PLAYLIST
 
     # 获取课程信息
     course_info = get_summary(url)
@@ -185,11 +192,16 @@ def start(url, path='', pdf=True):
     # 是否需要 PDF 课件
     WANT_PDF = pdf
 
+    if not os.path.isdir(os.path.join(BASE_DIR, 'Videos')):
+        os.mkdir(os.path.join(BASE_DIR, 'Videos'))
+
     # 打开一些文件方便写入
     VIDEOS = open(os.path.join(BASE_DIR, 'Videos.txt'), 'w', encoding='utf-8')
     OUTLINE = open(os.path.join(BASE_DIR, 'Outline.txt'), 'w', encoding='utf-8')
-    RENAMER = open(os.path.join(BASE_DIR, 'Rename.bat'), 'w', encoding='utf-8')
+    RENAMER = open(os.path.join(BASE_DIR, 'Videos', 'Rename.bat'), 'w', encoding='utf-8')
+    PLAYLIST = open(os.path.join(BASE_DIR, 'Playlist.dpl.bak'), 'w', encoding='utf-8')
     RENAMER.write('CHCP 65001\n\n')
+    PLAYLIST.write('DAUMPLAYLIST\n\n')
 
     # course_info[0] 就是 termId
     get_resource(course_info[0])
@@ -198,6 +210,7 @@ def start(url, path='', pdf=True):
     RENAMER.close()
     VIDEOS.close()
     OUTLINE.close()
+    PLAYLIST.close()
 
 
 if __name__ == '__main__':

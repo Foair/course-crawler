@@ -222,7 +222,7 @@ def start(url, path='', book=True, cookies={}):
     OUTLINE = open(os.path.join(BASE_DIR, 'Outline.txt'), 'w', encoding='utf-8')
     VIDEOS = open(os.path.join(BASE_DIR, 'Videos.txt'), 'w', encoding='utf-8')
     RENAMER = open(os.path.join(BASE_DIR, 'Rename.bat'), 'w', encoding='utf-8')
-    PLAYLIST = open(os.path.join(BASE_DIR, '_Playlist.dpl'), 'w', encoding='utf-8')
+    PLAYLIST = open(os.path.join(BASE_DIR, 'Playlist.dpl.bak'), 'w', encoding='utf-8')
     RENAMER.write('CHCP 65001\n\n')
     PLAYLIST.write('DAUMPLAYLIST\n\n')
 
