@@ -1,6 +1,6 @@
 ## Course Crawler
 
-一个基于 Python 3 的 MOOC 课程下载工具，可以获取 [中国大学MOOC](http://www.icourse163.org/)、[学堂在线](http://www.xuetangx.com/)、[网易云课堂 MOOC](http://mooc.study.163.com/)、~~[好大学在线](http://www.cnmooc.org/)~~ 的课件，方便离线观看。
+一个基于 Python 3 的 MOOC 课程下载工具，可以获取 [中国大学MOOC](https://www.icourse163.org/)、[学堂在线](http://www.xuetangx.com/)、[网易云课堂 MOOC](http://mooc.study.163.com/)、~~[好大学在线](http://www.cnmooc.org/)~~ 的课件，方便离线观看。
 
 详细信息和帮助：[https://mooc.xoy.io/](https://mooc.xoy.io/)。
 
