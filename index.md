@@ -2,17 +2,15 @@
 layout: default
 ---
 
-一个基于 Python 3 的 MOOC 课程爬虫，可以获取 [中国大学MOOC](http://www.icourse163.org/)、[学堂在线](http://www.xuetangx.com/)、[网易云课堂 MOOC](http://mooc.study.163.com/) 的免费课程，方便离线观看。中国大学MOOC和网易云课堂 MOOC 目前可以获取到的资源有视频、富文本、附件和字幕；学堂在线可以获取到视频、电子书和字幕。
+一个基于 Python 3 的 MOOC 课程爬虫，可以获取 [中国大学MOOC](http://www.icourse163.org/)、[学堂在线](http://www.xuetangx.com/)、[网易云课堂的 MOOC 课程](http://mooc.study.163.com/) 的免费课程，方便离线观看。（为了方便，下文简称「网易云课堂的 MOOC 课程」为「网易云课堂 MOOC」。）中国大学MOOC·和·网易云课堂 MOOC·目前可以获取到的资源有视频、富文本、附件和字幕；学堂在线可以获取到视频、电子书和字幕。
 
 虽然程序写的不怎么样，但是结构齐全、命名规范，可以很方便定位和查找。
 
 ## 说明
 
-只在 Windows 10 经过简单测试，bug 和缺陷是肯定有的。
+只在 Windows 10 经过简单测试，bug 和缺陷是肯定有的。欢迎提交 issue 和发起 PR。
 
-如果遇到有不能解析的课程，可以第一时间将课程的链接发到我的邮箱 [master@foair.com](mailto:master@foair.com)，我会尽快修复，但**请勿催更**。我会在时间充裕，并且我也需要下载新课程的时候才会更新。所以在程序还未失效的时候，**尽可能多**地下载视频。
-
-放到 GitHub 是为了大家一起学习 Python，也勉励自己进步。如果有人愿意接手的话，那也是很好的哦。
+如果遇到有不能解析的课程，可以第一时间将课程的链接发到我的邮箱 [master@foair.com](mailto:master@foair.com)，我会尽快修复。我会在时间充裕，并且我也需要下载新课程的时候才会更新。所以在程序还未失效的时候，**尽可能多**地下载视频。
 
 如果有任何好的建议也可以通过邮件和我联系。
 
@@ -27,9 +25,9 @@ pip install requests BeautifulSoup4 lxml
 然后下载 ZIP 压缩文件（使用 Git 也是可以的），下面是各个文件的简单说明：
 
 - `mooc.py`：主程序
-- `icourse.py`：中国大学MOOC模块
-- `study.py`：网易云课堂 MOOC 模块
-- `xuetangx.py`：学堂在线模块
+- `icourse.py`：中国大学MOOC·模块
+- `study.py`：网易云课堂 MOOC·模块
+- `xuetangx.py`：学堂在线·模块
 
 下面是各个 MOOC 平台的说明，找到自己需要的看即可。
 
@@ -41,7 +39,7 @@ pip install requests BeautifulSoup4 lxml
 
 ## 中国大学MOOC
 
-课程的地址必须 `http://www.icourse163.org/course/TONGJI-1001569002` 或`http://www.icourse163.org/course/TONGJI-1001569002?tid=1001640020` 这两种格式。
+课程的地址必须 `https://www.icourse163.org/course/TONGJI-1001569002` 或`https://www.icourse163.org/course/TONGJI-1001569002?tid=1001640020` 这两种格式。
 
 这两个的区别就是开课的次数不同。第一个是第 2 次开课，第二个是第 1 次开课。
 
@@ -81,7 +79,7 @@ console.log(document.cookie);
 
 ## 网易云课堂 MOOC
 
-无法适用于网易云课堂的普通课程，只适用于 `mooc.study.163.com` 域下的课程，只能使用 cookie 登录。不像中国大学MOOC那样，网易云课堂 MOOC 必须要登录才有权限查看和下载课程，所以登录的 cookies 务必设置。
+无法适用于·网易云课堂·的普通课程，只适用于 `mooc.study.163.com` 域下的课程，只能使用 cookie 登录。不像·中国大学MOOC·那样，网易云课堂 MOOC·必须要登录才有权限查看和下载课程，所以登录的 cookies 务必设置。
 
 课程地址是这样的地址：
 
@@ -89,9 +87,9 @@ console.log(document.cookie);
 
 ![网易云课堂 MOOC](study163_sample.png)
 
-找不到如图页面的话，也可以参照中国大学MOOC的方法。
+找不到如图页面的话，也可以参照·中国大学MOOC·的方法。
 
-用浏览器进入网易云课堂的首页，然后登录。打开一个 MOOC 课程的页面，比如 [程序设计入门—Java语言 - 网易云课堂](http://mooc.study.163.com/course/cloudclass-1000002014)。右键 ➔ 【审查元素】，然后切换到【Network】选项卡，然后点进入课程的学习按钮。回到【Network】那里，选择【Doc】，点第一个。然后往下滚动，复制 `Cookie:` 后面的内容。
+用浏览器进入·网易云课堂·的首页，然后登录。打开一个 MOOC 课程的页面，比如 [程序设计入门—Java语言 - 网易云课堂](http://mooc.study.163.com/course/cloudclass-1000002014)。鼠标右键 ➔ `审查元素`，然后切换到 `Network` 选项卡，然后点进入课程的学习按钮。回到 `Network` 那里，选择 `Doc`，点第一个。然后往下滚动，复制 `Cookie:` 后面的内容。
 
 ![网易云课堂 1](study163_1.png)
 
@@ -101,7 +99,7 @@ console.log(document.cookie);
 
 这里的地址是课程的地址，可以是三个的平台的任何一个，程序会自动识别。
 
-学堂在线和网易云课堂需要经过认证，如果没有看过前面的内容的话，可能要回到前面看看。
+学堂在线·和·网易云课堂·需要经过认证，如果没有看过前面使用说明的话，可能要回到前面看看。
 
 # 其他选项
 
@@ -147,7 +145,7 @@ Videos.txt
 ```
 6.1 空间直角坐标系及向量 {1}
   6.1.1 空间直角坐标系的基本概念 {1.1}
-    6.1.1 空间直角坐标系的基本概念（视频） {1.1.1}
+    6.1.1 空间直角坐标系的基本概念（视频） {1.1.1}#
     6.1.1 空间直角坐标系的基本概念（PPT） {1.1.1}+
     6.1.1 空间直角坐标系的基本概念（PPT） 空间直角坐标系的基本概念.rar {1.1.1}!
 ...
@@ -157,7 +155,7 @@ Videos.txt
 
 下面是符号的说明：
 
-`{1.1.1}`：视频文件，位于课程根目录下
+`{1.1.1}#`：视频文件，位于课程根目录下
 `{1.1.1}*`：课件，一般是 PDF 文件，位于 `PDFs` 目录下
 `{1.1.1}+`：富文本，一般是 HTML 文件，位于 `Texts` 目录下
 `{1.1.1}!`：附件，位于 `Files` 目录下
@@ -192,7 +190,7 @@ REN "1005899086_7780acc4ac074ed89b6301e41349a2c1_shd.mp4" "3.1.1 平面方程（
 
 ### 几个文件夹
 
-☸ 中国大学MOOC和网易云课堂 MOOC 课程
+☸ 中国大学MOOC·和·网易云课堂 MOOC·课程
 
 `Files` 是课程的附件；`PDFs` 是课程的课件；`Texts` 是课程的富文本。
 
@@ -204,7 +202,7 @@ REN "1005899086_7780acc4ac074ed89b6301e41349a2c1_shd.mp4" "3.1.1 平面方程（
 
 ☸ 我的 cookies 输错了（失效了），怎么重新填写 cookies？
 
-> Cookies 是保存在文件里的，对于学堂在线是 `cookies_xuetangx.json`，网易云课堂是 `cookies_mooc_study.json`，只要删除对应的文件就会要求重新输入 cookies 了。
+> Cookies 是保存在文件里的，对于·学堂在线·是 `cookies_xuetangx.json`，网易云课堂是 `cookies_mooc_study.json`，只要删除对应的文件就会要求重新输入 cookies 了。
 
 ## 已知问题
 
@@ -212,6 +210,6 @@ REN "1005899086_7780acc4ac074ed89b6301e41349a2c1_shd.mp4" "3.1.1 平面方程（
 
 > 解决方法：等待一段时间然后重新尝试。
 
-☸ 网易云课堂的 cookies 很容易失效
+☸ 网易云课堂·的 cookies 很容易失效
 
 > 解决方法：更加频繁地修改 cookies。
