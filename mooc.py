@@ -8,26 +8,28 @@ import json
 import argparse
 
 
-def store_cookies(fname):
-    """存储并返回 cookies 字典"""
+def store_cookies(file_name):
+    """存储并返回 Cookie 字典"""
 
     def cookie_to_json():
-        """将分号分隔的 cookies 转为字典"""
-        cookies = {}
+        """将分号分隔的 Cookie 转为字典"""
+
+        cookies_dict = {}
         raw_cookies = input('> ')
 
         for cookie in raw_cookies.split(';'):
             key, value = cookie.lstrip().split("=", 1)
-            cookies[key] = value
+            cookies_dict[key] = value
 
-        return cookies
+        return cookies_dict
 
-    if not os.path.isfile(fname):
-        print("输入 cookies 来创建文件：")
+    if not os.path.isfile(file_name):
+        print("输入 Cookie：")
         cookies = cookie_to_json()
-        with open(fname, 'w') as f:
+        with open(file_name, 'w') as f:
             json.dump(cookies, f)
-    with open(fname) as cookies_file:
+
+    with open(file_name) as cookies_file:
         cookies = json.load(cookies_file)
 
     return cookies
@@ -35,29 +37,43 @@ def store_cookies(fname):
 
 def main():
     """解析命令行参数并调用相关模块进行下载"""
-    parser = argparse.ArgumentParser(description='下载 MOOC 课程的程序。')
+
+    parser = argparse.ArgumentParser(description='Course Crawler')
     parser.add_argument('url', help='课程地址')
-    parser.add_argument('-d', default=r'G:\MOOCs', help='下载目录')
-    parser.add_argument('-i', action='store_true', help='交互式修改文件名')
-    parser.add_argument('--no-pdf', action='store_false', help='不下载 PDF 文档')
+    parser.add_argument('-c', action='store_true', help='执行任务的时候重新输入 cookies（待完成）')
+    parser.add_argument('-d', default=r'', help='下载目录')
+    parser.add_argument('--inter', action='store_true', help='交互式修改文件名')
+    parser.add_argument('--no-doc', action='store_false', help='不下载 PDF、Word 等文档')
     parser.add_argument('--no-sub', action='store_false', help='不下载字幕')
     parser.add_argument('--no-file', action='store_false', help='不下载附件')
     parser.add_argument('--no-text', action='store_false', help='不下载富文本')
+    parser.add_argument('--no-dpl', action='store_false', help='不生成播放列表')
+
     args = parser.parse_args()
 
-    if re.match(r'https?://www.icourse163.org/course/.+?', args.url):
-        import icourse
-        icourse.start(args.url, args.d, args.no_pdf, args.no_sub, args.no_file, args.no_text)
-    elif re.match(r'https?://www.xuetangx.com/courses/.+/about.*', args.url):
-        import xuetangx
+    config = {'doc': args.no_doc, 'sub': args.no_sub, 'file': args.no_file, 'text': args.no_text, 'dpl': args.no_dpl,
+              'cookies': args.c, 'rename': args.inter, 'dir': args.d}
+
+    if re.match(r'https?://www.icourse163.org/course/', args.url):
+        from mooc import icourse163
+        icourse163.start(args.url, config)
+    elif re.match(r'https?://www.xuetangx.com/courses/.+/about', args.url):
+        from mooc import xuetangx
         cookies = store_cookies('xuetangx.json')
-        xuetangx.start(args.url, args.d, args.no_pdf, args.no_sub, args.no_file, args.no_text, cookies)
-    elif re.match(r'https?://mooc.study.163.com/course/.+?', args.url):
-        import study_mooc
+        xuetangx.start(args.url, config, cookies)
+    elif re.match(r'https?://mooc.study.163.com/course/', args.url):
+        from mooc import study_mooc
         cookies = store_cookies('study_163_mooc.json')
-        study_mooc.start(args.url, args.d, args.no_pdf, cookies)
+        study_mooc.start(args.url, config, cookies)
+    elif re.match(r'https?://www.cnmooc.org/portal/course/', args.url):
+        from mooc import cnmooc
+        cookies = store_cookies('cnmooc.json')
+        cnmooc.start(args.url, config, cookies)
+    elif re.match(r'https?://www.icourses.cn/web/sword/portal/videoDetail', args.url):
+        from mooc import icourses
+        icourses.start(args.url, config)
     else:
-        print('输入课程地址有误！')
+        print('课程地址有误！')
         sys.exit(1)
 
 

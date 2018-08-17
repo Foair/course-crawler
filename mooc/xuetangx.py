@@ -1,57 +1,62 @@
 # -*- coding: utf-8 -*-
-"""学堂在线 课程下载"""
+"""学堂在线"""
 
-import re
 import json
 from bs4 import BeautifulSoup
-from utils import *
+from .utils import *
 
 BASE_URL = 'http://www.xuetangx.com'
-CNADY = Crawler()
+CANDY = Crawler()
+CONFIG = {}
+FILES = {}
 
 
 def get_book(url):
     """获得所有的 PDF 电子书"""
-    nav_page = CNADY.get(url).text
+
+    nav_page = CANDY.get(url).text
     shelves = set(re.findall(r'/courses/.+/pdfbook/\d/', nav_page))
     for shelf_count, shelf in enumerate(shelves, 1):
-        res = CNADY.get(BASE_URL + shelf).text
+        res = CANDY.get(BASE_URL + shelf).text
         soup = BeautifulSoup(res, 'lxml')
         WORK_DIR.change('Books', str(shelf_count))
         for book_count, book in enumerate(soup.select('#booknav a'), 1):
-            src_print(book.string)
-            file_name = file_to_save(book.string) + '.pdf'
-            pdf = CNADY.get(BASE_URL + book['rel'][0]).content
-            with open(WORK_DIR.file(file_name), 'wb') as pdf_file:
-                pdf_file.write(pdf)
+            res_print(book.string)
+            file_name = Resource.file_to_save(book.string) + '.pdf'
+            CANDY.download_bin(BASE_URL + book['rel'][0], WORK_DIR.file(file_name))
 
 
 def get_handout(url):
-    """从课程信息页面获得课程讲义的 HTML 文件"""
-    res = CNADY.get(url).text
+    """从课程信息页面获得课程讲义并存为 HTML 文件"""
+
+    handouts_html = ClassicFile('Handouts.html')
+    res = CANDY.get(url).text
     soup = BeautifulSoup(res, 'lxml')
     handouts = soup.find(class_='handouts')
+
+    # 将相对地址替换为绝对地址
     for link in handouts.select('a[href^="/"]'):
         link['href'] = BASE_URL + link['href']
-    with open('Handouts.html', 'w', encoding='utf-8') as handouts_html:
-        handouts_html.write('<!DOCTYPE html>\n<html>\n<head>\n<title>讲义</title>\n<meta charset="utf-8">\n</head>\n<body>\n%s</body>\n</html>\n' % handouts.prettify())
+    handouts_html.write_string('<!DOCTYPE html>\n<html>\n<head>\n<title>讲义</title>\n<meta charset="utf-8">\n'
+                               '</head>\n<body>\n%s</body>\n</html>' % handouts.prettify())
 
 
 def get_video(video):
     """根据视频 ID 和文件名字获取视频信息"""
+
     file_name = video.file_name
-    src_print(file_name + '.mp4')
-    res = CNADY.get('https://xuetangx.com/videoid2source/' + video.meta).text
+    res_print(file_name + '.mp4')
+    res = CANDY.get('https://xuetangx.com/videoid2source/' + video.meta).text
     try:
         video_url = json.loads(res)['sources']['quality20'][0]
-    except:
+    except KeyError:
         video_url = json.loads(res)['sources']['quality10'][0]
-    VIDEOS.write(video_url)
-    RENAMER.write(re.search(r'(\w+-[12]0.mp4)', video_url).group(1), file_name)
+    FILES['videos'].write_string(video_url)
+    FILES['renamer'].write(re.search(r'(\w+-[12]0.mp4)', video_url).group(1), file_name)
 
 
 def get_content(url):
-    """ 获取网页详细内容 """
+    """获取网页详细内容"""
 
     outline = Outline()
     counter = Counter()
@@ -59,7 +64,7 @@ def get_content(url):
     playlist = Playlist()
     video_list = []
 
-    courseware = CNADY.get(url).text
+    courseware = CANDY.get(url).text
     soup = BeautifulSoup(courseware, 'lxml')
 
     chapters = soup.find(id='accordion').find_all(class_='chapter')
@@ -78,7 +83,7 @@ def get_content(url):
 
             outline.write(section_title, counter, 1)
 
-            section_page = CNADY.get(section_url).text
+            section_page = CANDY.get(section_url).text
             soup = BeautifulSoup(section_page, 'lxml')
 
             tabs = soup.find(id='sequence-list').find_all('li')
@@ -102,7 +107,7 @@ def get_content(url):
                     try:
                         # 极少数没有 data-type 属性
                         block_type = block['data-type']
-                    except:
+                    except KeyError:
                         continue
                     if block_type == 'Video':
                         video_counter.add(2)
@@ -120,76 +125,82 @@ def get_content(url):
                         video_list.append(video)
 
                         if CONFIG['sub']:
-                            get_subtitles(block.div['data-transcript-available-translations-url'], block.div['data-transcript-translation-url'], video.file_name)
+                            get_subtitles(block.div['data-transcript-available-translations-url'],
+                                          block.div['data-transcript-translation-url'],
+                                          video.file_name)
     if video_list:
         WORK_DIR.change('Videos')
-        parse_res_list(video_list, WORK_DIR.file('Names.txt'), playlist, get_video)
-        
-def get_subtitles(avaliable, transcript, file_name):
-        subtitle_available_url = BASE_URL + avaliable
-        try:
-            subtitle_available = CNADY.get(subtitle_available_url).json()
-        except:
-            return
-        WORK_DIR.change('Videos')
-        base_subtitle_url = BASE_URL + transcript + '/'
-        multi_subtitle = False if len(subtitle_available) == 1 else True
-        for subtitle_desc in subtitle_available:
-            subtitle_url = base_subtitle_url + subtitle_desc
-            CNADY.get(subtitle_url)
-            if multi_subtitle:
-                sub_file_name = file_name + '_' + subtitle_desc.replace('_xuetangx', '') + '.srt'
-            else:
-                sub_file_name = file_name + '.srt'
-            subtitle = CNADY.get(subtitle_available_url.rstrip('available_translations') + 'download').content
-            with open(WORK_DIR.file(sub_file_name), 'wb') as subtitle_file:
-                subtitle_file.write(subtitle)
+        rename = WORK_DIR.file('Names.txt') if CONFIG['rename'] else False
+        if CONFIG['dpl']:
+            parse_res_list(video_list, rename, playlist.write, get_video)
+        else:
+            parse_res_list(video_list, rename, get_video)
+
+
+def get_subtitles(available, transcript, file_name):
+    """获取字幕"""
+
+    subtitle_available_url = BASE_URL + available
+    try:
+        subtitle_available = CANDY.get(subtitle_available_url).json()
+    except json.decoder.JSONDecodeError:
+        return
+    WORK_DIR.change('Videos')
+    base_subtitle_url = BASE_URL + transcript + '/'
+    multi_subtitle = False if len(subtitle_available) == 1 else True
+    for subtitle_desc in subtitle_available:
+        subtitle_url = base_subtitle_url + subtitle_desc
+        CANDY.get(subtitle_url)
+        if multi_subtitle:
+            sub_file_name = file_name + '_' + subtitle_desc.replace('_xuetangx', '') + '.srt'
+        else:
+            sub_file_name = file_name + '.srt'
+        subtitle = CANDY.get(subtitle_available_url.rstrip('available_translations') + 'download').content
+        with open(WORK_DIR.file(sub_file_name), 'wb') as subtitle_file:
+            subtitle_file.write(subtitle)
+
 
 def get_summary(url):
-    about_page = CNADY.get(url).text
+    """从课程地址获得课程文件夹名称"""
+
+    about_page = CANDY.get(url).text
     soup = BeautifulSoup(about_page, 'lxml')
 
     course_name = soup.find(id='title1').string
     institution = soup.find(class_='courseabout_text').a.string
 
-    dir_name = CourseDir(course_name, institution)
+    dir_name = course_dir(course_name, institution)
     print(dir_name)
     return dir_name
 
 
-def start(url, path='', book=True, sub=True, files=True, text=True, cookies={}):
-    """调用接口"""
+def start(url, config, cookies=None):
+    """调用接口函数"""
 
-    global VIDEOS, RENAMER, WORK_DIR, CONFIG
-    CONFIG = {'book': book, 'sub': sub, 'file': files, 'text': text}
+    global WORK_DIR
+    CONFIG.update(config)
 
-    CNADY.set_cookies(cookies)
-    status = CNADY.get('http://www.xuetangx.com/header_ajax')
+    CANDY.set_cookies(cookies)
+    status = CANDY.get('http://www.xuetangx.com/header_ajax')
     if status.json()['login']:
         print('验证成功！')
     else:
-        print('Cookies 失效，请获取新的 cookies！')
+        print('cookies 失效，请获取新的 cookies！')
         return
 
     course_name = get_summary(url)
 
-    WORK_DIR = WorkingDir(path, course_name)
+    WORK_DIR = WorkingDir(CONFIG['dir'], course_name)
     WORK_DIR.change('Videos')
-    RENAMER = Renamer(WORK_DIR.file('Rename.bat'))
-    VIDEOS = ClassicFile(WORK_DIR.file('Videos.txt'))
+    FILES['renamer'] = Renamer(WORK_DIR.file('Rename.bat'))
+    FILES['videos'] = ClassicFile(WORK_DIR.file('Videos.txt'))
 
     handout = url.rstrip('about') + 'info'
     courseware = url.rstrip('about') + 'courseware'
 
-    if CONFIG['book']:
+    if CONFIG['doc']:
         # 使用 handout 作为入口更快
         get_book(handout)
 
     get_handout(handout)
     get_content(courseware)
-
-
-
-if __name__ == '__main__':
-    # start('http://www.xuetangx.com/courses/course-v1:TsinghuaX+00740043X_2015_T2+sp/about', r'F:\MOOCs', True)
-    pass
