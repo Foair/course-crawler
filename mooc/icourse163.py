@@ -33,15 +33,15 @@ def parse_resource(resource):
                  'c0-param3': 'number:' + resource.meta[2], 'batchId': str(int(time.time() * 1000))}
     res = CANDY.post('https://www.icourse163.org/dwr/call/plaincall/CourseBean.getLessonUnitLearnVo.dwr',
                      data=post_data).text
-
+    
     file_name = resource.file_name
     if resource.type == 'Video':
-        mp4url = (re.search(r'mp4ShdUrl="(.*?\.mp4.*?)"', res) or
-                  re.search(r'mp4HdUrl="(.*?\.mp4.*?)"', res) or
-                  re.search(r'mp4SdUrl="(.*?\.mp4.*?)"', res)).group(1)
-        res_print(file_name + '.mp4')
-        FILES['renamer'].write(re.search(r'(\w+\.mp4)', mp4url).group(1), file_name)
-        FILES['video'].write_string(mp4url)
+        videoUrl, videoExName = (re.search(r'ShdUrl="(?P<url>.*?(?P<exName>\.((m3u8)|(mp4)|(flv))).*?)"', res) or
+                  re.search(r'HdUrl="(?P<url>.*?(?P<exName>\.((m3u8)|(mp4)|(flv))).*?)"', res) or
+                  re.search(r'SdUrl="(?P<url>.*?(?P<exName>\.((m3u8)|(mp4)|(flv))).*?)"', res)).group('url', 'exName')
+        res_print(file_name + videoExName)
+        FILES['renamer'].write(re.search(r'(\w+\.((m3u8)|(mp4)|(flv)))', videoUrl).group(1), file_name)
+        FILES['video'].write_string(videoUrl)
 
         if not CONFIG['sub']:
             return
@@ -146,7 +146,7 @@ def get_resource(term_id):
             parse_res_list(video_list, rename, parse_resource)
     if pdf_list:
         WORK_DIR.change('PDFs')
-        parse_res_list(pdf_list, parse_resource)
+        parse_res_list(pdf_list, rename, parse_resource)
     if rich_text_list:
         WORK_DIR.change('Texts')
         parse_res_list(rich_text_list, None, parse_resource)
