@@ -36,12 +36,16 @@ def parse_resource(resource):
     
     file_name = resource.file_name
     if resource.type == 'Video':
-        videoUrl, videoExName = (re.search(r'ShdUrl="(?P<url>.*?(?P<exName>\.((m3u8)|(mp4)|(flv))).*?)"', res) or
-                  re.search(r'HdUrl="(?P<url>.*?(?P<exName>\.((m3u8)|(mp4)|(flv))).*?)"', res) or
-                  re.search(r'SdUrl="(?P<url>.*?(?P<exName>\.((m3u8)|(mp4)|(flv))).*?)"', res)).group('url', 'exName')
+        spList = ['Shd', 'Hd', 'Sd']
+        for sp in spList[spList.index(CONFIG['sharpness']):]:
+            videoInfo = re.search(r'%sUrl="(?P<url>.*?(?P<ex_name>\.((m3u8)|(mp4)|(flv))).*?)"'%sp, res)
+            if videoInfo:
+                videoUrl, videoExName= videoInfo.group('url', 'ex_name')
+                break
         res_print(file_name + videoExName)
-        FILES['renamer'].write(re.search(r'(\w+\.((m3u8)|(mp4)|(flv)))', videoUrl).group(1), file_name)
+        FILES['renamer'].write(re.search(r'(\w+\.((m3u8)|(mp4)|(flv)))', videoUrl).group(1), file_name, videoExName)
         FILES['video'].write_string(videoUrl)
+        resource.ex_name = videoExName
 
         if not CONFIG['sub']:
             return
@@ -76,7 +80,6 @@ def get_resource(term_id):
     """获取各种资源"""
 
     outline = Outline()
-    playlist = Playlist()
     counter = Counter()
 
     video_list = []
@@ -141,7 +144,8 @@ def get_resource(term_id):
         rename = WORK_DIR.file('Names.txt') if CONFIG['rename'] else False
         WORK_DIR.change('Videos')
         if CONFIG['dpl']:
-            parse_res_list(video_list, rename, playlist.write, parse_resource)
+            playlist = Playlist()
+            parse_res_list(video_list, rename, parse_resource, playlist.write)
         else:
             parse_res_list(video_list, rename, parse_resource)
     if pdf_list:

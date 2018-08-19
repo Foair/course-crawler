@@ -70,6 +70,7 @@ class Video(Resource):
     """
 
     type = 'Video'
+    ex_name = '.mp4'
 
 
 class Document(Resource):
@@ -147,7 +148,7 @@ class Playlist(ClassicFile):
         """传入一个 Video 类的对象，将该对象的信息写入播放列表"""
 
         self._count += 1
-        self.write_string('%d*file*Videos\%s.mp4' % (self._count, video.file_name))
+        self.write_string('%d*file*Videos\%s%s' % (self._count, video.file_name, video.ex_name))
         self.write_string('%d*title*%s %s\n' % (self._count, '.'.join(video.id.split('.')[:-1]), video.name))
 
 
@@ -161,13 +162,13 @@ class Renamer(ClassicFile):
         if SYS == 'nt':
             self.write_string('CHCP 65001\n')
 
-    def write(self, origin_name, file_name):
+    def write(self, origin_name, file_name, ex_name='.mp4'):
         """传入一个文件的原始名字（URL 中的文件名）和一个新的文件名"""
 
         if SYS == 'nt':
-            self.write_string('REN "%s" "%s.mp4"' % (origin_name, file_name))
+            self.write_string('REN "%s" "%s%s"' % (origin_name, file_name, ex_name))
         else:
-            self.write_string('mv "%s" "%s.mp4"' % (origin_name, file_name))
+            self.write_string('mv "%s" "%s%s"' % (origin_name, file_name, ex_name))
 
 
 class Outline(ClassicFile):

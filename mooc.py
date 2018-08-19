@@ -42,6 +42,7 @@ def main():
     parser.add_argument('url', help='课程地址')
     parser.add_argument('-c', action='store_true', help='执行任务的时候重新输入 cookies（待完成）')
     parser.add_argument('-d', default=r'', help='下载目录')
+    parser.add_argument('-s', default='Shd', help='视频清晰度')
     parser.add_argument('--inter', action='store_true', help='交互式修改文件名')
     parser.add_argument('--no-doc', action='store_false', help='不下载 PDF、Word 等文档')
     parser.add_argument('--no-sub', action='store_false', help='不下载字幕')
@@ -52,7 +53,7 @@ def main():
     args = parser.parse_args()
 
     config = {'doc': args.no_doc, 'sub': args.no_sub, 'file': args.no_file, 'text': args.no_text, 'dpl': args.no_dpl,
-              'cookies': args.c, 'rename': args.inter, 'dir': args.d}
+              'cookies': args.c, 'rename': args.inter, 'dir': args.d, 'sharpness': args.s[0].upper() + args.s[1:].lower()}
 
     if re.match(r'https?://www.icourse163.org/course/', args.url):
         from mooc import icourse163
