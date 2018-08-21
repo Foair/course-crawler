@@ -9,7 +9,7 @@ SYS = os.name
 
 
 class Resource(object):
-    """ 所有资源类的基类
+    """所有资源类的基类
 
     用来定义一个资源，但不同类型的资源可能要对部分功能进行重写。
 
@@ -70,7 +70,7 @@ class Video(Resource):
     """
 
     type = 'Video'
-    ex_name = '.mp4'
+    ext = '.mp4'
 
 
 class Document(Resource):
@@ -148,7 +148,7 @@ class Playlist(ClassicFile):
         """传入一个 Video 类的对象，将该对象的信息写入播放列表"""
 
         self._count += 1
-        self.write_string('%d*file*Videos\%s%s' % (self._count, video.file_name, video.ex_name))
+        self.write_string('%d*file*Videos\%s%s' % (self._count, video.file_name, video.ext))
         self.write_string('%d*title*%s %s\n' % (self._count, '.'.join(video.id.split('.')[:-1]), video.name))
 
 
@@ -162,13 +162,13 @@ class Renamer(ClassicFile):
         if SYS == 'nt':
             self.write_string('CHCP 65001\n')
 
-    def write(self, origin_name, file_name, ex_name='.mp4'):
+    def write(self, origin_name, file_name, ext='.mp4'):
         """传入一个文件的原始名字（URL 中的文件名）和一个新的文件名"""
 
         if SYS == 'nt':
-            self.write_string('REN "%s" "%s%s"' % (origin_name, file_name, ex_name))
+            self.write_string('REN "%s" "%s%s"' % (origin_name, file_name, ext))
         else:
-            self.write_string('mv "%s" "%s%s"' % (origin_name, file_name, ex_name))
+            self.write_string('mv "%s" "%s%s"' % (origin_name, file_name, ext))
 
 
 class Outline(ClassicFile):
@@ -273,7 +273,7 @@ class WorkingDir(object):
 
 
 class Counter(object):
-    """ 计数器类
+    """计数器类
     
     属性
         counter：计数器的列表。
@@ -319,7 +319,7 @@ def course_dir(course_name, institution):
     return Resource.regex_file.sub('', '%s - %s' % (course_name, institution))
 
 
-def parse_res_list(res_list, file=None, *operator):
+def parse_res_list(res_list, file, *operator):
     """传入一个 Resource 实例的列表，并传入一个临时文件名，将调出默认程序修改名字，并调用对象的 operation 方法"""
 
     if file:

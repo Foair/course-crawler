@@ -185,7 +185,7 @@ def start(url, config, cookies=None):
     if status.json()['login']:
         print('验证成功！')
     else:
-        print('cookies 失效，请获取新的 cookies！')
+        print('cookies 失效，请获取新的 cookies 并删除 xuetangx.json！')
         return
 
     course_name = get_summary(url)

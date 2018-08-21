@@ -33,19 +33,22 @@ def parse_resource(resource):
                  'c0-param3': 'number:' + resource.meta[2], 'batchId': str(int(time.time() * 1000))}
     res = CANDY.post('https://www.icourse163.org/dwr/call/plaincall/CourseBean.getLessonUnitLearnVo.dwr',
                      data=post_data).text
-    
+
     file_name = resource.file_name
     if resource.type == 'Video':
-        spList = ['Shd', 'Hd', 'Sd']
-        for sp in spList[spList.index(CONFIG['sharpness']):]:
-            videoInfo = re.search(r'%sUrl="(?P<url>.*?(?P<ex_name>\.((m3u8)|(mp4)|(flv))).*?)"'%sp, res)
-            if videoInfo:
-                videoUrl, videoExName= videoInfo.group('url', 'ex_name')
+        resolutions = ['Shd', 'Hd', 'Sd']
+        for sp in resolutions[CONFIG['resolution']:]:
+            # TODO: 增加视频格式选择
+            # video_info = re.search(r'%sUrl="(?P<url>.*?(?P<ext>\.((m3u8)|(mp4)|(flv))).*?)"' % sp, res)
+            video_info = re.search(r'(?P<ext>mp4)%sUrl="(?P<url>.*?\.(?P=ext).*?)"' % sp, res)
+            if video_info:
+                url, ext = video_info.group('url', 'ext')
+                ext = '.' + ext
                 break
-        res_print(file_name + videoExName)
-        FILES['renamer'].write(re.search(r'(\w+\.((m3u8)|(mp4)|(flv)))', videoUrl).group(1), file_name, videoExName)
-        FILES['video'].write_string(videoUrl)
-        resource.ex_name = videoExName
+        res_print(file_name + ext)
+        FILES['renamer'].write(re.search(r'(\w+\.((m3u8)|(mp4)|(flv)))', url).group(1), file_name, ext)
+        FILES['video'].write_string(url)
+        resource.ext = ext
 
         if not CONFIG['sub']:
             return

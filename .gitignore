@@ -102,3 +102,9 @@ ENV/
 
 # PyCharm
 .idea/
+
+# cookies JSON
+/*.json
+
+# course dir
+* - */
