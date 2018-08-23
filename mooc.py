@@ -67,6 +67,10 @@ def main():
         from mooc import study_mooc
         cookies = store_cookies('study_163_mooc.json')
         study_mooc.start(args.url, config, cookies)
+    elif re.match(r'https?://study.163.com/course/', args.url):
+        from mooc import study_163
+        cookies = store_cookies('study_163_mooc.json')
+        study_163.start(args.url, config, cookies)
     elif re.match(r'https?://www.cnmooc.org/portal/course/', args.url):
         from mooc import cnmooc
         cookies = store_cookies('cnmooc.json')
