@@ -177,7 +177,7 @@ def get_resource(term_id):
             parse_res_list(video_list, rename, parse_resource)
     if pdf_list:
         WORK_DIR.change('PDFs')
-        parse_res_list(pdf_list, parse_resource)
+        parse_res_list(pdf_list, None, parse_resource)
     if rich_text_list:
         WORK_DIR.change('Texts')
         parse_res_list(rich_text_list, None, parse_resource)
