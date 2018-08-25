@@ -49,7 +49,7 @@ def get_video(video):
     res = CANDY.get('https://xuetangx.com/videoid2source/' + video.meta).text
     try:
         video_url = json.loads(res)['sources']['quality20'][0]
-    except KeyError:
+    except:
         video_url = json.loads(res)['sources']['quality10'][0]
     FILES['videos'].write_string(video_url)
     FILES['renamer'].write(re.search(r'(\w+-[12]0.mp4)', video_url).group(1), file_name)
@@ -86,7 +86,11 @@ def get_content(url):
             section_page = CANDY.get(section_url).text
             soup = BeautifulSoup(section_page, 'lxml')
 
-            tabs = soup.find(id='sequence-list').find_all('li')
+            # 对于某些需要安装 MathPlayer 插件的网页
+            try:
+                tabs = soup.find(id='sequence-list').find_all('li')
+            except AttributeError:
+                break
             for tab_count, tab_info in enumerate(tabs, 1):
                 counter.add(2)
                 # title 可能出现换行符和重复，所以用 data-page-title
@@ -185,7 +189,7 @@ def start(url, config, cookies=None):
     if status.json()['login']:
         print('验证成功！')
     else:
-        print('cookies 失效，请获取新的 cookies 并删除 xuetangx.json！')
+        print('Cookie 失效。请获取新的 Cookie 并删除 xuetangx.json。')
         return
 
     course_name = get_summary(url)
