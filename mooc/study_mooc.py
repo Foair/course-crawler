@@ -32,7 +32,7 @@ def get_announce(term_id):
                  'httpSessionId': 'dba4977be78d42a78a6e2c2dd2b9bb42', 'c0-scriptName': 'CourseBean',
                  'c0-methodName': 'getAllAnnouncementByTerm', 'c0-id': '0', 'c0-param0': 'number:' + term_id,
                  'c0-param1': 'number:1', 'batchId': str(int(time.time() * 1000))}
-    res = CANDY.post('http://mooc.study.163.com/dwr/call/plaincall/CourseBean.getAllAnnouncementByTerm.dwr',
+    res = CANDY.post('https://mooc.study.163.com/dwr/call/plaincall/CourseBean.getAllAnnouncementByTerm.dwr',
                      data=post_data).text
     announcements = re.findall(r'content="(.*?[^\\])".*title="(.*?[^\\])"', res)
 
@@ -55,7 +55,7 @@ def parse_resource(resource):
                  'c0-param1': 'number:' + resource.meta[0], 'c0-param2': 'number:' + resource.meta[1],
                  'c0-param3': 'number:0', 'c0-param4': 'number:' + resource.meta[2],
                  'batchId': str(int(time.time() * 1000))}
-    res = CANDY.post('http://mooc.study.163.com/dwr/call/plaincall/CourseBean.getLessonUnitLearnVo.dwr',
+    res = CANDY.post('https://mooc.study.163.com/dwr/call/plaincall/CourseBean.getLessonUnitLearnVo.dwr',
                      data=post_data).text
 
     file_name = resource.file_name
@@ -117,7 +117,7 @@ def get_resource(term_id):
                  'httpSessionId': 'b8efd4c73fd1434896507b83de631f0f', 'c0-scriptName': 'CourseBean',
                  'c0-methodName': 'getLastLearnedMocTermDto', 'c0-id': '0', 'c0-param0': 'number:' + term_id,
                  'batchId': str(int(time.time() * 1000))}
-    res = CANDY.post('http://mooc.study.163.com/dwr/call/plaincall/CourseBean.getLastLearnedMocTermDto.dwr',
+    res = CANDY.post('https://mooc.study.163.com/dwr/call/plaincall/CourseBean.getLastLearnedMocTermDto.dwr',
                      data=post_data).text.encode('utf_8').decode('unicode_escape')
 
     chapters = re.findall(r'homeworks=\w+;.+id=(\d+).+name="(.+)";', res)
@@ -197,6 +197,7 @@ def start(url, config, cookies=None):
     # 创建课程目录
     WORK_DIR = WorkingDir(CONFIG['dir'], course_info[1])
 
+    print(course_info[0])
     # 课程公告
     get_announce(course_info[0])
 
