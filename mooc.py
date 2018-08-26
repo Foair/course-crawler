@@ -23,6 +23,7 @@ def store_cookies(file_name):
 
         return cookies_dict
 
+    file_name = os.path.join(sys.path[0], file_name)
     if not os.path.isfile(file_name):
         print("输入 Cookie：")
         cookies = cookie_to_json()
