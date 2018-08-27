@@ -121,7 +121,7 @@ def get_resource(course_id):
         counter.add(0)
         outline.write(chapter[1], counter, 0)
 
-        lessons = re.findall(r'chapterId='+ chapter[0] +';.+hasReferences=(\w+);.+id=(\d+);.+lessonName="(.+?)";.+type=(\d);', res)
+        lessons = re.findall('chapterId=%s;.+?hasReferences=(\w+);.+?id=(\d+).+?lessonName="(.*?)";.+?type=(\d);' % chapter[0], res, re.DOTALL)
         for lesson in lessons:
             counter.add(1)
             outline.write(lesson[2], counter, 1)
