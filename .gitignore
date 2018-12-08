@@ -108,3 +108,10 @@ ENV/
 
 # course dir
 * - */
+
+# Visual Studio Code
+.vscode/
+
+# Node
+node_modules/
+yarn.lock
