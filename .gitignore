@@ -115,3 +115,4 @@ ENV/
 # Node
 node_modules/
 yarn.lock
+commitlint.config.js

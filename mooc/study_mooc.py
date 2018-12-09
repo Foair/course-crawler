@@ -165,7 +165,7 @@ def get_resource(term_id):
                         res_print(params['fileName'])
                         file_name = '%s %s' % (counter, file_name)
                         CANDY.download_bin('https://www.icourse163.org/course/attachment.htm',
-                                           WORK_DIR.file(file_name), params=params)
+                                           WORK_DIR.file(file_name), params=params, cookies={'STUDY_SESS': None})
             counter.reset()
 
     if video_list:
