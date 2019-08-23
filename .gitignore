@@ -128,3 +128,9 @@ draft/
 # IDEs/editors
 .vscode/
 .idea/
+
+# PKGBUILD
+course-crawler/
+src/
+pkg/
+*.pkg.tar.xz
