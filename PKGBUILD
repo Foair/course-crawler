@@ -25,8 +25,8 @@ package() {
   install -m755 "${_pkgname}.sh" "${pkgdir}/usr/bin/${_pkgname}"
 
   install -dm777 "${pkgdir}/usr/share/${_pkgname}"
-  install -dm777 "${pkgdir}/usr/share/${_pkgname}/mooc"
-  install -m777 mooc.py "${pkgdir}/usr/share/${_pkgname}/mooc.py"
+  install -dm755 "${pkgdir}/usr/share/${_pkgname}/mooc"
+  install -m755 mooc.py "${pkgdir}/usr/share/${_pkgname}/mooc.py"
   install -m755 LICENSE "${pkgdir}/usr/share/${_pkgname}/LICENSE"
   install -m755 mooc/*.py "${pkgdir}/usr/share/${_pkgname}/mooc"
 }
