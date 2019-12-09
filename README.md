@@ -5,7 +5,7 @@
 详细信息和用法请见 [https://mooc.xoy.io/](https://mooc.xoy.io/)。
 
 ### m3u8下载脚本使用
-依赖系统ffmpeg, 需要先安装ffmpeg，<https://www.ffmpeg.org/download.html>
+依赖系统ffmpeg, 需要先安装ffmpeg，<https://www.ffmpeg.org/download.html> 在Ubuntu下已测试。
 
 ```sh
 ./download_m3u8.py -l 学术规范与论文写作/Videos/Videos.txt

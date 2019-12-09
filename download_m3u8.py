@@ -5,7 +5,7 @@ import argparse
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Download m3u8 to mp4')
-    parser.add_argument('-l', default=r'', help='下载目录')
+    parser.add_argument('-l', default=r'', help='视频列表')
     parser.add_argument('-d', default=r'', help='下载目录')
     args = parser.parse_args()
     video_list = os.path.abspath(args.l)
