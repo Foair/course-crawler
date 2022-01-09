@@ -1,3 +1,9 @@
+本项目不再更新，推荐使用：
+
+https://github.com/PyJun/Mooc_Downloader
+
+---
+
 ## Course Crawler
 
 一个基于 Python 3 的 MOOC 课程下载工具，可以获取 [中国大学MOOC](https://www.icourse163.org/)、[学堂在线](http://www.xuetangx.com/)、[网易云课堂 MOOC](http://mooc.study.163.com/)、[好大学在线](https://www.cnmooc.org/)、[爱课程](http://www.icourses.cn/) 的课件，方便离线观看。
