@@ -10,6 +10,13 @@ https://github.com/PyJun/Mooc_Downloader
 
 详细信息和用法请见 [https://mooc.xoy.io/](https://mooc.xoy.io/)。
 
+### m3u8下载脚本使用
+依赖系统ffmpeg, 需要先安装ffmpeg，<https://www.ffmpeg.org/download.html> 在Ubuntu下已测试。
+
+```sh
+./download_m3u8.py -l 学术规范与论文写作/Videos/Videos.txt
+```
+
 ### 声明
 
 仅限个人学习和研究使用，切勿用于其他用途。强烈建议到 MOOC 网站进行学习，本程序只是提供一个备选方案。

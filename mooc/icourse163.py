@@ -3,6 +3,7 @@
 
 import time
 from .utils import *
+import json
 
 CANDY = Crawler()
 CONFIG = {}
@@ -11,21 +12,21 @@ FILES = {}
 
 def get_summary(url):
     """从课程主页面获取信息"""
+    res = CANDY.get(url)
+    cookie_csrf = res.cookies.get('NTESSTUDYSI')
+    res_t = res.text
 
-    res = CANDY.get(url).text
-
-    term_id = re.search(r'termId : "(\d+)"', res).group(1)
-    names = re.findall(r'name:"(.+)"', res)
+    term_id = re.search(r'termId : "(\d+)"', res_t).group(1)
+    names = re.findall(r'name:"(.+)"', res_t)
 
     dir_name = course_dir(*names[:2])
 
     print(dir_name)
-    return term_id, dir_name
+    return term_id, dir_name, cookie_csrf
 
 
 def parse_resource(resource):
     """解析资源地址和下载资源"""
-
     post_data = {'callCount': '1', 'scriptSessionId': '${scriptSessionId}190',
                  'httpSessionId': '5531d06316b34b9486a6891710115ebc', 'c0-scriptName': 'CourseBean',
                  'c0-methodName': 'getLessonUnitLearnVo', 'c0-id': '0', 'c0-param0': 'number:' + resource.meta[0],
@@ -34,21 +35,28 @@ def parse_resource(resource):
     res = CANDY.post('https://www.icourse163.org/dwr/call/plaincall/CourseBean.getLessonUnitLearnVo.dwr',
                      data=post_data).text
 
+
     file_name = resource.file_name
     if resource.type == 'Video':
-        resolutions = ['Shd', 'Hd', 'Sd']
-        for sp in resolutions[CONFIG['resolution']:]:
-            # TODO: 增加视频格式选择
-            # video_info = re.search(r'%sUrl="(?P<url>.*?(?P<ext>\.((m3u8)|(mp4)|(flv))).*?)"' % sp, res)
-            video_info = re.search(r'(?P<ext>mp4)%sUrl="(?P<url>.*?\.(?P=ext).*?)"' % sp, res)
-            if video_info:
-                url, ext = video_info.group('url', 'ext')
-                ext = '.' + ext
-                break
-        res_print(file_name + ext)
-        FILES['renamer'].write(re.search(r'(\w+\.((m3u8)|(mp4)|(flv)))', url).group(1), file_name, ext)
-        FILES['video'].write_string(url)
-        resource.ext = ext
+        post_data = {'bizId': resource.meta[2],
+                     'bizType': '1',
+                     'contentType': '1'}
+        url = 'https://www.icourse163.org/web/j/resourceRpcBean.getResourceToken.rpc?csrfKey={}'.format(CONFIG['_cookie_csrf'])
+        res = CANDY.post(url,data=post_data).text
+        res_json = json.loads(res)
+        if res_json.get('code', -1) != 0:
+            print('get signature error.')
+            return
+        sig = res_json['result']['videoSignDto']['signature']
+
+        url = 'https://vod.study.163.com/eds/api/v1/vod/video?videoId={}&signature={}&clientType=1'.format(resource.meta[0], sig)
+        res = CANDY.get(url).text
+        res_json = json.loads(res)
+        url = res_json['result']['videos'][-1]['videoUrl']
+        name = res_json['result']['name']
+        FILES['video'].write_string('{}\t{}'.format(name,url))
+        res_print('{}\t{}'.format(name, url))
+
 
         if not CONFIG['sub']:
             return
@@ -165,7 +173,8 @@ def start(url, config):
     global WORK_DIR
 
     CONFIG.update(config)
-    term_id, dir_name = get_summary(url)
+    term_id, dir_name, cookie_csrf = get_summary(url)
+    CONFIG['_cookie_csrf'] = cookie_csrf
 
     WORK_DIR = WorkingDir(CONFIG['dir'], dir_name)
     WORK_DIR.change('Videos')
